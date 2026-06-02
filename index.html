@@ -45,8 +45,6 @@ tailwind.config = {
   .nav-link.active::after { content:''; position:absolute; bottom:-17px; left:0; right:0; height:2px; background:#0A0A0A; }
   .product-card:hover .product-img { transform: scale(1.04) }
   .product-img { transition: transform 0.4s ease; }
-  .product-card:hover .quick-btn { opacity:1; transform: translateY(0) }
-  .quick-btn { opacity:0; transform: translateY(6px); transition: all 0.2s ease; }
   /* tile gradients per vertical */
   .tile-sneakers     { background: linear-gradient(135deg, #FFE8B0 0%, #FFD17A 100%); }
   .tile-tickets      { background: linear-gradient(135deg, #C8E0FF 0%, #99BFFF 100%); }
@@ -124,8 +122,11 @@ tailwind.config = {
         Pick what you want. We load a card with the exact amount and buy it the instant it goes live — sneakers, tickets, reservations, anything.
       </p>
       <div class="mt-7 flex flex-wrap gap-3">
-        <a href="#feed" class="tap inline-flex items-center gap-2 bg-ink-950 text-white font-semibold px-6 py-3 rounded-full text-sm hover:bg-ink-900">Browse drops →</a>
-        <button class="tap inline-flex items-center gap-2 bg-white border border-ink-300 text-ink-950 font-semibold px-6 py-3 rounded-full text-sm hover:bg-ink-50">How it works</button>
+        <button onclick="openPrime('aj4')" class="tap inline-flex items-center gap-2 bg-ink-950 text-white font-semibold px-6 py-3 rounded-full text-sm hover:bg-ink-900">
+          <svg viewBox="0 0 24 24" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z"/></svg>
+          Snag your first drop
+        </button>
+        <a href="#feed" class="tap inline-flex items-center gap-2 bg-white border border-ink-300 text-ink-950 font-semibold px-6 py-3 rounded-full text-sm hover:bg-ink-50">Browse all drops →</a>
       </div>
       <div class="mt-7 flex items-center gap-5 text-xs text-ink-500">
         <div class="flex items-center gap-1.5"><span class="w-1 h-1 rounded-full bg-emerald-500"></span>Card auto-expires after drop</div>
@@ -151,7 +152,7 @@ tailwind.config = {
               <div class="text-[10px] text-ink-500">Retail</div>
               <div class="mono font-bold">$215</div>
             </div>
-            <button onclick="openPrime('aj4')" class="tap bg-ink-950 text-white font-semibold px-4 py-2 rounded-full text-xs">Auto-buy →</button>
+            <button onclick="openPrime('aj4')" class="tap bg-ink-950 text-white font-semibold px-4 py-2 rounded-full text-xs hover:bg-ink-900">Snag it →</button>
           </div>
         </div>
       </div>
@@ -422,21 +423,22 @@ function productCard(d) {
   const tile = VERTICALS[d.v].tile;
   return `
     <div class="product-card group">
-      <div class="relative">
-        <button onclick="openPrime('${d.id}')" class="block w-full aspect-square rounded-2xl overflow-hidden ${tile} relative">
-          <div class="product-img absolute inset-0 grid place-items-center text-[88px] select-none">${d.emoji}</div>
-          ${d.hot ? '<div class="absolute top-3 left-3 inline-flex items-center gap-1.5 bg-white/95 backdrop-blur px-2 py-1 rounded-full text-[10px] font-bold"><span class="w-1.5 h-1.5 rounded-full bg-red-500 pulse-dot"></span>HOT</div>' : ''}
-          <div class="absolute top-3 right-3 bg-white/95 backdrop-blur px-2 py-1 rounded-full text-[10px] font-bold mono" data-countdown="${d.dropsAt.getTime()}">${fmtFriendly(d.dropsAt)}</div>
-        </button>
-        <button onclick="openPrime('${d.id}')" class="quick-btn tap absolute bottom-3 left-3 right-3 bg-ink-950 text-white font-semibold py-2.5 rounded-full text-xs">Auto-buy →</button>
-      </div>
+      <button onclick="openPrime('${d.id}')" class="block w-full aspect-square rounded-2xl overflow-hidden ${tile} relative">
+        <div class="product-img absolute inset-0 grid place-items-center text-[88px] select-none">${d.emoji}</div>
+        ${d.hot ? '<div class="absolute top-3 left-3 inline-flex items-center gap-1.5 bg-white/95 backdrop-blur px-2 py-1 rounded-full text-[10px] font-bold"><span class="w-1.5 h-1.5 rounded-full bg-red-500 pulse-dot"></span>HOT</div>' : ''}
+        <div class="absolute top-3 right-3 bg-white/95 backdrop-blur px-2 py-1 rounded-full text-[10px] font-bold mono" data-countdown="${d.dropsAt.getTime()}">${fmtFriendly(d.dropsAt)}</div>
+      </button>
       <div class="mt-3 px-1">
         <div class="text-[11px] text-ink-500 font-medium">${d.brand}</div>
-        <div class="text-sm font-semibold mt-0.5 leading-snug line-clamp-2">${d.title}</div>
-        <div class="mt-1 flex items-center justify-between">
+        <div class="text-sm font-semibold mt-0.5 leading-snug line-clamp-2 min-h-[2.5rem]">${d.title}</div>
+        <div class="mt-1.5 flex items-center justify-between">
           <div class="mono text-sm font-bold">${d.price>0 ? '$'+d.price.toLocaleString() : 'Free'}</div>
           <div class="text-[11px] text-ink-500"><span class="mono">${d.armed.toLocaleString()}</span> watching</div>
         </div>
+        <button onclick="openPrime('${d.id}')" class="tap mt-3 w-full bg-ink-950 text-white font-semibold py-2.5 rounded-full text-sm hover:bg-ink-900 flex items-center justify-center gap-1.5">
+          <svg viewBox="0 0 24 24" class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z"/></svg>
+          Snag it for me
+        </button>
       </div>
     </div>
   `;
@@ -609,8 +611,8 @@ function renderPrime() {
         </button>
       </div>
 
-      <button onclick="nextStep()" class="tap mt-6 w-full bg-ink-950 text-white font-semibold py-3.5 rounded-full">Load $${total.toFixed(2)} & arm agent →</button>
-      <div class="mt-3 text-center text-[11px] text-ink-500">Card is hard-capped — agent literally cannot overspend.</div>
+      <button onclick="nextStep()" class="tap mt-6 w-full bg-ink-950 text-white font-semibold py-3.5 rounded-full hover:bg-ink-900">Load $${total.toFixed(2)} & snag it →</button>
+      <div class="mt-3 text-center text-[11px] text-ink-500">Your card is hard-capped — we literally cannot overspend.</div>
     `;
   } else if (primeStep === 3) {
     body.innerHTML = `
