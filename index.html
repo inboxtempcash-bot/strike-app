@@ -54,6 +54,8 @@ tailwind.config = {
   .tile-auctions     { background: linear-gradient(135deg, #FFD0DC 0%, #FFA0B5 100%); }
   .tile-travel       { background: linear-gradient(135deg, #C9F0E5 0%, #8EDFC8 100%); }
   .tile-mints        { background: linear-gradient(135deg, #FFEFB8 0%, #FFD566 100%); }
+  .tile-other        { background: linear-gradient(135deg, #ECECEC 0%, #C8C8C8 100%); }
+  .url-input:focus { box-shadow: 0 0 0 3px rgba(10,10,10,0.08); }
   details > summary { list-style:none } details > summary::-webkit-details-marker { display:none }
 </style>
 </head>
@@ -74,7 +76,8 @@ tailwind.config = {
       <div class="hidden md:flex flex-1 max-w-xl">
         <div class="relative w-full">
           <svg viewBox="0 0 24 24" class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-400" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
-          <input placeholder="Search drops, brands, or paste a link" class="w-full bg-ink-100 border border-transparent rounded-full pl-10 pr-4 py-2.5 text-sm placeholder:text-ink-500 focus:outline-none focus:bg-white focus:border-ink-300" />
+          <input id="navSearch" onkeydown="if(event.key==='Enter') snagFromUrl(this.value)" placeholder="Search drops or paste any link (Supreme, Resy, eBay…)" class="w-full bg-ink-100 border border-transparent rounded-full pl-10 pr-20 py-2.5 text-sm placeholder:text-ink-500 focus:outline-none focus:bg-white focus:border-ink-300" />
+          <button onclick="snagFromUrl(document.getElementById('navSearch').value)" class="absolute right-1.5 top-1/2 -translate-y-1/2 bg-ink-950 text-white text-xs font-semibold px-3 py-1.5 rounded-full hover:bg-ink-900">Snag</button>
         </div>
       </div>
 
@@ -113,25 +116,49 @@ tailwind.config = {
     <div>
       <div class="inline-flex items-center gap-2 text-xs font-semibold text-ink-700 bg-ink-100 px-3 py-1.5 rounded-full">
         <span class="w-1.5 h-1.5 rounded-full bg-red-500 pulse-dot"></span>
-        18 drops in the next 24 hours
+        Works on any site
       </div>
       <h1 class="mt-5 text-4xl lg:text-5xl font-extrabold leading-[1.05] tracking-tight">
-        The drop happens.<br/>You don't have to.
+        Snag anything<br/>before it sells out.
       </h1>
       <p class="mt-4 text-base lg:text-lg text-ink-500 max-w-md leading-relaxed">
-        Pick what you want. We load a card with the exact amount and buy it the instant it goes live — sneakers, tickets, reservations, anything.
+        Paste a link to <span class="font-semibold text-ink-700">any product, ticket, or reservation</span> — or pick from drops below. We load a card with the exact amount and buy the moment it goes live.
       </p>
-      <div class="mt-7 flex flex-wrap gap-3">
-        <button onclick="openPrime('aj4')" class="tap inline-flex items-center gap-2 bg-ink-950 text-white font-semibold px-6 py-3 rounded-full text-sm hover:bg-ink-900">
-          <svg viewBox="0 0 24 24" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z"/></svg>
-          Snag your first drop
-        </button>
-        <a href="#feed" class="tap inline-flex items-center gap-2 bg-white border border-ink-300 text-ink-950 font-semibold px-6 py-3 rounded-full text-sm hover:bg-ink-50">Browse all drops →</a>
+
+      <div class="mt-6">
+        <label class="text-xs font-semibold text-ink-700">Paste any link</label>
+        <div class="mt-2 flex items-stretch gap-2">
+          <div class="relative flex-1">
+            <svg viewBox="0 0 24 24" class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-400" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></svg>
+            <input id="heroUrl" onkeydown="if(event.key==='Enter') snagFromUrl(this.value)" placeholder="supreme.com/shop/box-logo-tee" class="url-input w-full bg-white border border-ink-300 rounded-full pl-10 pr-4 py-3.5 text-sm placeholder:text-ink-400 focus:outline-none focus:border-ink-950" />
+          </div>
+          <button onclick="snagFromUrl(document.getElementById('heroUrl').value)" class="tap inline-flex items-center gap-2 bg-ink-950 text-white font-semibold px-5 py-3.5 rounded-full text-sm hover:bg-ink-900 flex-shrink-0">
+            <svg viewBox="0 0 24 24" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z"/></svg>
+            Snag it
+          </button>
+        </div>
+        <div class="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-ink-500">
+          <span>Try:</span>
+          <button onclick="useSample('https://www.supremenewyork.com/shop/jackets/box-logo')"  class="hover:text-ink-950 underline-offset-2 hover:underline">supremenewyork.com</button>
+          <button onclick="useSample('https://www.resy.com/cities/ny/carbone')"                 class="hover:text-ink-950 underline-offset-2 hover:underline">resy.com/carbone</button>
+          <button onclick="useSample('https://www.ebay.com/itm/PSA-10-Charizard-1st-Edition')" class="hover:text-ink-950 underline-offset-2 hover:underline">ebay.com</button>
+          <button onclick="useSample('https://www.ticketmaster.com/taylor-swift-eras-tokyo')"  class="hover:text-ink-950 underline-offset-2 hover:underline">ticketmaster.com</button>
+          <button onclick="useSample('https://shop.rolex.com/daytona-126500ln')"               class="hover:text-ink-950 underline-offset-2 hover:underline">rolex.com</button>
+        </div>
       </div>
-      <div class="mt-7 flex items-center gap-5 text-xs text-ink-500">
-        <div class="flex items-center gap-1.5"><span class="w-1 h-1 rounded-full bg-emerald-500"></span>Card auto-expires after drop</div>
-        <div class="flex items-center gap-1.5"><span class="w-1 h-1 rounded-full bg-emerald-500"></span>Refund if it sells out</div>
-        <div class="flex items-center gap-1.5"><span class="w-1 h-1 rounded-full bg-emerald-500"></span>~400ms checkout</div>
+
+      <div class="mt-6 flex items-center gap-3">
+        <div class="flex-1 h-px bg-ink-200"></div>
+        <span class="text-[11px] uppercase tracking-wider text-ink-400 font-semibold">or pick a curated drop</span>
+        <div class="flex-1 h-px bg-ink-200"></div>
+      </div>
+
+      <div class="mt-5 flex flex-wrap gap-3">
+        <a href="#feed" class="tap inline-flex items-center gap-2 bg-white border border-ink-300 text-ink-950 font-semibold px-5 py-2.5 rounded-full text-sm hover:bg-ink-50">Browse all drops →</a>
+        <div class="flex items-center gap-3 text-xs text-ink-500">
+          <span class="flex items-center gap-1.5"><span class="w-1 h-1 rounded-full bg-emerald-500"></span>Card auto-expires</span>
+          <span class="flex items-center gap-1.5"><span class="w-1 h-1 rounded-full bg-emerald-500"></span>Refund if sold out</span>
+        </div>
       </div>
     </div>
     <div class="hidden lg:block relative">
@@ -327,6 +354,7 @@ const VERTICALS = {
   auctions:     { label:'Auctions'    , tile:'tile-auctions' },
   travel:       { label:'Travel'      , tile:'tile-travel' },
   mints:        { label:'Mints'       , tile:'tile-mints' },
+  other:        { label:'Other'       , tile:'tile-other' },
 };
 
 const ALL_DROPS = [
@@ -493,13 +521,65 @@ function tick() {
 }
 
 /* =========================
-   PRIME / AUTO-BUY FLOW
+   URL → CUSTOM SNAG
+========================= */
+function detectVertical(host) {
+  const h = (host||'').toLowerCase();
+  const map = [
+    [['nike','snkrs','yeezy','adidas','newbalance','supreme','footlocker','goat','stockx','ssense'], { v:'sneakers',     brand:host, emoji:'👟', sizes:['7','8','9','10','11','12','S','M','L','XL'] }],
+    [['ticketmaster','axs','seatgeek','stubhub','coachella','f1','nba'],                              { v:'tickets',      brand:host, emoji:'🎟️', sizes:['GA','Floor','Sec 100s','Sec 200s','Sec 300s'] }],
+    [['rolex','omega','hodinkee','tudor','swatch','patek','gshock'],                                  { v:'watches',      brand:host, emoji:'⌚', sizes:['Standard','Alt finish'] }],
+    [['pokemon','topps','funko','lego','target','walmart'],                                           { v:'collectibles', brand:host, emoji:'🃏', sizes:['Standard','Limited'] }],
+    [['resy','opentable','tock','sevenrooms','dorsia'],                                               { v:'reservations', brand:host, emoji:'🍽️', sizes:['2 ppl','4 ppl','6 ppl','8 ppl'] }],
+    [['sothebys','ebay','heritage','christies'],                                                      { v:'auctions',     brand:host, emoji:'🔨', sizes:['Single lot'] }],
+    [['going','delta','united','aa','american','amex','marriott','hilton'],                           { v:'travel',       brand:host, emoji:'✈️', sizes:['1 pax','2 pax','4 pax'] }],
+    [['opensea','base','manifold','foundation','magic','blur'],                                       { v:'mints',        brand:host, emoji:'🎨', sizes:['1 mint','5 mints','Max'] }],
+  ];
+  for (const [keys, val] of map) if (keys.some(k => h.includes(k))) return val;
+  return { v:'other', brand: host || 'Custom', emoji:'🛍️', sizes:['One size','S','M','L','XL'] };
+}
+
+function useSample(url) { const el = document.getElementById('heroUrl'); if (el) el.value = url; snagFromUrl(url); }
+
+function snagFromUrl(url) {
+  url = (url||'').trim();
+  if (!url) return;
+  let host = url, full = url;
+  try {
+    const u = new URL(url.startsWith('http') ? url : 'https://' + url);
+    host = u.hostname.replace(/^www\./,'');
+    full = u.toString();
+  } catch(e) { host = url.split('/')[0]; }
+  const d = detectVertical(host);
+  const path = (full.split(host)[1] || '').slice(0,42).replace(/^\//,'') || 'item';
+  const synthetic = {
+    id: 'custom-'+Date.now(),
+    v: d.v,
+    brand: host,
+    title: 'Snag from ' + host,
+    pathHint: path,
+    emoji: d.emoji,
+    price: 100,
+    meta: 'Custom URL',
+    dropsAt: new Date(Date.now() + 2*3600000),
+    armed: 0,
+    demand: 7.0,
+    sizes: d.sizes,
+    isCustom: true,
+    sourceUrl: full,
+  };
+  ALL_DROPS.push(synthetic);
+  openPrime(synthetic.id);
+}
+
+/* =========================
+   PRIME / SNAG FLOW
 ========================= */
 function openPrime(id) {
   primeDrop = ALL_DROPS.find(d => d.id===id);
   if (!primeDrop) return;
   primeStep = 1;
-  primeConfig = { size:null, max: primeDrop.price || 100 };
+  primeConfig = { size:null, max: primeDrop.price || 100, customTitle:'', customWhen:'asap' };
   document.getElementById('primeModal').classList.remove('hidden');
   renderPrime();
 }
@@ -520,7 +600,30 @@ function renderPrime() {
     const isAuction = primeDrop.v === 'auctions';
     const sliderLabel = isAuction ? 'Max bid' : isReservation ? 'Hold per seat' : 'Max price';
     const sizeLabel = isReservation ? 'Party size' : isAuction ? 'Lot' : primeDrop.v==='tickets' ? 'Section' : primeDrop.v==='watches' ? 'Variant' : 'Size';
-    body.innerHTML = `
+    const headerBlock = primeDrop.isCustom ? `
+      <div class="flex items-center gap-4">
+        <div class="w-20 h-20 rounded-2xl ${tile} grid place-items-center text-4xl flex-shrink-0">${primeDrop.emoji}</div>
+        <div class="min-w-0 flex-1">
+          <div class="inline-flex items-center gap-1.5 text-[10px] uppercase tracking-wider font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded">
+            <span class="w-1 h-1 rounded-full bg-emerald-500"></span> Custom link detected
+          </div>
+          <div class="font-bold leading-tight mt-1.5 truncate">${primeDrop.brand}</div>
+          <div class="text-[11px] text-ink-500 mt-0.5 font-mono truncate">/${primeDrop.pathHint}</div>
+        </div>
+      </div>
+
+      <div class="mt-5">
+        <label class="text-xs font-semibold text-ink-700">Name this snag</label>
+        <input id="customTitle" oninput="primeConfig.customTitle=this.value" placeholder="e.g. Supreme Box Logo Hoodie M" class="mt-2 w-full bg-white border border-ink-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-ink-950" />
+      </div>
+
+      <div class="mt-5">
+        <div class="text-xs font-semibold text-ink-700 mb-2">Category</div>
+        <div class="flex flex-wrap gap-1.5" id="vGrid">
+          ${Object.keys(VERTICALS).map(v => `<button onclick="pickVertical('${v}')" data-v="${v}" class="tap px-3 py-1.5 rounded-full border ${v===primeDrop.v?'border-ink-950 bg-ink-950 text-white':'border-ink-300 bg-white text-ink-700'} text-xs font-semibold">${VERTICALS[v].label}</button>`).join('')}
+        </div>
+      </div>
+    ` : `
       <div class="flex items-center gap-4">
         <div class="w-20 h-20 rounded-2xl ${tile} grid place-items-center text-4xl flex-shrink-0">${primeDrop.emoji}</div>
         <div class="min-w-0">
@@ -529,13 +632,26 @@ function renderPrime() {
           <div class="text-xs text-ink-500 mt-1">${primeDrop.meta} · Drops in <span class="mono font-semibold text-ink-700" data-countdown="${primeDrop.dropsAt.getTime()}">${fmtCountdown(primeDrop.dropsAt)}</span></div>
         </div>
       </div>
-
+    `;
+    body.innerHTML = headerBlock + `
       <div class="mt-6">
-        <div class="text-xs font-semibold text-ink-700 mb-2">${sizeLabel}</div>
-        <div class="grid grid-cols-4 gap-2" id="sizeGrid">
-          ${primeDrop.sizes.map(s => `<button onclick="pickSize('${s}')" data-size="${s}" class="tap py-3 rounded-xl border border-ink-300 bg-white text-sm font-semibold hover:border-ink-950">${s}</button>`).join('')}
+        <div class="text-xs font-semibold text-ink-700 mb-2">${primeDrop.isCustom ? 'Variant / size (optional)' : sizeLabel}</div>
+        ${primeDrop.isCustom
+          ? `<input oninput="primeConfig.size=this.value; enableContinue()" placeholder="e.g. M, 10.5, Sec 102, 4 ppl" class="w-full bg-white border border-ink-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-ink-950" />`
+          : `<div class="grid grid-cols-4 gap-2" id="sizeGrid">${primeDrop.sizes.map(s => `<button onclick="pickSize('${s}')" data-size="${s}" class="tap py-3 rounded-xl border border-ink-300 bg-white text-sm font-semibold hover:border-ink-950">${s}</button>`).join('')}</div>`
+        }
+      </div>
+
+      ${primeDrop.isCustom ? `
+      <div class="mt-5">
+        <div class="text-xs font-semibold text-ink-700 mb-2">When to strike</div>
+        <div class="grid grid-cols-3 gap-2" id="whenGrid">
+          <button onclick="pickWhen('asap')"   data-when="asap"   class="tap py-2.5 rounded-xl border border-ink-950 bg-ink-950 text-white text-xs font-semibold">ASAP / on restock</button>
+          <button onclick="pickWhen('time')"   data-when="time"   class="tap py-2.5 rounded-xl border border-ink-300 bg-white text-xs font-semibold">At a set time</button>
+          <button onclick="pickWhen('price')"  data-when="price"  class="tap py-2.5 rounded-xl border border-ink-300 bg-white text-xs font-semibold">When ≤ my price</button>
         </div>
       </div>
+      ` : ''}
 
       <div class="mt-6">
         <div class="flex items-center justify-between mb-2">
@@ -553,7 +669,7 @@ function renderPrime() {
         <span class="font-semibold">~400ms checkout.</span> Median win rate this drop: <span class="font-bold">${Math.round(primeDrop.demand*7)}%</span>. We'll text you the moment it goes through.
       </div>
 
-      <button onclick="nextStep()" id="step1Next" disabled class="tap mt-6 w-full bg-ink-200 text-ink-500 font-semibold py-3.5 rounded-full">Continue →</button>
+      <button onclick="nextStep()" id="step1Next" ${primeDrop.isCustom ? '' : 'disabled'} class="tap mt-6 w-full ${primeDrop.isCustom ? 'bg-ink-950 text-white hover:bg-ink-900' : 'bg-ink-200 text-ink-500'} font-semibold py-3.5 rounded-full">Continue →</button>
     `;
   } else if (primeStep === 2) {
     const isReservation = primeDrop.v === 'reservations';
@@ -683,10 +799,29 @@ function pickSize(s) {
     b.classList.toggle('border-ink-300', !sel);
     b.classList.toggle('bg-white', !sel);
   });
-  const btn = document.getElementById('step1Next');
+  enableContinue();
+}
+function enableContinue() {
+  const btn = document.getElementById('step1Next'); if (!btn) return;
   btn.disabled = false;
   btn.classList.remove('bg-ink-200','text-ink-500');
-  btn.classList.add('bg-ink-950','text-white');
+  btn.classList.add('bg-ink-950','text-white','hover:bg-ink-900');
+}
+function pickVertical(v) {
+  primeDrop.v = v;
+  primeDrop.emoji = ({sneakers:'👟',tickets:'🎟️',watches:'⌚',collectibles:'🃏',reservations:'🍽️',auctions:'🔨',travel:'✈️',mints:'🎨',other:'🛍️'})[v];
+  renderPrime();
+}
+function pickWhen(w) {
+  primeConfig.customWhen = w;
+  document.querySelectorAll('#whenGrid [data-when]').forEach(b => {
+    const sel = b.dataset.when === w;
+    b.classList.toggle('border-ink-950', sel);
+    b.classList.toggle('bg-ink-950', sel);
+    b.classList.toggle('text-white', sel);
+    b.classList.toggle('border-ink-300', !sel);
+    b.classList.toggle('bg-white', !sel);
+  });
 }
 function setMax(v) { primeConfig.max = parseFloat(v); document.getElementById('maxPrice').textContent = v; }
 function selectPay(btn) {
@@ -705,9 +840,9 @@ function nextStep() {
     AGENTS.unshift({
       id:'new'+Date.now(),
       vertical: primeDrop.v,
-      title: primeDrop.title.split('—')[0].trim(),
+      title: (primeConfig.customTitle && primeConfig.customTitle.trim()) || primeDrop.title.split('—')[0].trim(),
       emoji: primeDrop.emoji,
-      size: primeConfig.size,
+      size: primeConfig.size || '—',
       limit: +(primeConfig.max * 1.18).toFixed(2),
       status:'armed',
       dropsAt: primeDrop.dropsAt,
