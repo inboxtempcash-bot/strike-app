@@ -3,400 +3,306 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>STRIKE — Agents for time-sensitive drops</title>
-<meta name="description" content="Spin up autonomous agents loaded with a debit card and the exact USDC to win sneaker drops, ticket onsales, watch releases, reservations, and more." />
+<title>Snag — Auto-buy the drops you actually want</title>
+<meta name="description" content="Pick a drop. We load a virtual card with the exact amount and buy it for you the moment it goes live." />
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script>
 tailwind.config = {
   theme: {
     extend: {
-      fontFamily: {
-        sans: ['Inter','system-ui','sans-serif'],
-        mono: ['JetBrains Mono','ui-monospace','monospace'],
-      },
+      fontFamily: { sans: ['Inter','system-ui','sans-serif'] },
       colors: {
-        ink: { 950:'#08080A', 925:'#0C0C0F', 900:'#101013', 850:'#15161A', 800:'#1B1C21', 750:'#23252B', 700:'#2D2F36', 600:'#40434D', 500:'#5A5E69' },
-        acid: { DEFAULT:'#D4FF3F', dim:'#A8CC2E', soft:'rgba(212,255,63,0.12)' },
+        ink: { 950:'#0A0A0A', 900:'#171717', 700:'#404040', 500:'#737373', 400:'#A3A3A3', 300:'#D4D4D4', 200:'#E5E5E5', 100:'#F5F5F5', 50:'#FAFAFA' },
+      },
+      boxShadow: {
+        soft: '0 1px 2px rgba(0,0,0,0.04), 0 4px 16px -4px rgba(0,0,0,0.06)',
+        pop:  '0 8px 24px -6px rgba(0,0,0,0.10), 0 2px 4px rgba(0,0,0,0.04)',
       },
     },
   },
 };
 </script>
 <style>
-  html,body { background:#08080A; color:#FAFAFA; }
-  body { font-family:'Inter',system-ui,sans-serif; -webkit-font-smoothing:antialiased; }
-  .mono { font-family:'JetBrains Mono',ui-monospace,monospace; font-variant-numeric:tabular-nums; }
-  .glass { background:linear-gradient(180deg, rgba(255,255,255,0.035), rgba(255,255,255,0.005)); backdrop-filter:blur(12px); }
-  .ring-acid { box-shadow: 0 0 0 1px rgba(212,255,63,0.5), 0 0 28px -6px rgba(212,255,63,0.35); }
+  body { font-family:'Inter',system-ui,sans-serif; -webkit-font-smoothing:antialiased; color:#0A0A0A; background:#FFFFFF; }
+  .mono { font-variant-numeric: tabular-nums; }
   .pulse-dot { animation: pulse 1.8s ease-in-out infinite; }
   @keyframes pulse { 0%,100%{opacity:1; transform:scale(1)} 50%{opacity:.45; transform:scale(.85)} }
-  .shake { animation: shake 0.4s ease-in-out infinite; }
-  @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-1px)} 75%{transform:translateX(1px)} }
   .scrollbar-hide::-webkit-scrollbar { display:none } .scrollbar-hide{ -ms-overflow-style:none; scrollbar-width:none }
-  .card-grad { background: radial-gradient(120% 80% at 0% 0%, rgba(212,255,63,0.08), transparent 60%), #101013; }
-  .hero-grad { background:
-    radial-gradient(60% 60% at 100% 0%, rgba(212,255,63,0.18), transparent 65%),
-    radial-gradient(60% 60% at 0% 100%, rgba(89,160,255,0.10), transparent 65%),
-    linear-gradient(180deg, #15161A, #0C0C0F); }
   .modal-enter { animation: slideUp 0.32s cubic-bezier(0.16,1,0.3,1); }
-  @keyframes slideUp { from{transform:translateY(24px); opacity:0} to{transform:translateY(0); opacity:1} }
-  .fade-in { animation: fadeIn 0.2s ease-out }
-  @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+  @keyframes slideUp { from{transform:translateY(16px); opacity:0} to{transform:translateY(0); opacity:1} }
+  .fade-in { animation: fadeIn 0.2s ease-out } @keyframes fadeIn { from{opacity:0} to{opacity:1} }
   .card-mat { animation: cardMat 0.9s cubic-bezier(0.2,0.9,0.2,1) forwards; transform: rotateY(90deg); opacity:0; }
   @keyframes cardMat { to { transform: rotateY(0deg); opacity:1 } }
-  .win-burst { animation: burst 0.6s ease-out }
-  @keyframes burst { 0%{transform:scale(.6); opacity:0} 60%{transform:scale(1.05); opacity:1} 100%{transform:scale(1); opacity:1} }
-  input[type=range].acid { -webkit-appearance:none; appearance:none; height:4px; background:#23252B; border-radius:9999px; outline:none; }
-  input[type=range].acid::-webkit-slider-thumb { -webkit-appearance:none; appearance:none; width:22px; height:22px; border-radius:9999px; background:#D4FF3F; border:3px solid #08080A; cursor:pointer; box-shadow: 0 0 0 1px #D4FF3F }
-  .tap { transition: transform .12s ease, opacity .12s ease, background-color .15s ease, border-color .15s ease } .tap:active { transform:scale(.98); opacity:.92 }
-  .nav-item { transition: background-color .12s ease, color .12s ease }
-  .nav-item.active { background:rgba(212,255,63,0.10); color:#D4FF3F }
-  .nav-item.active .nav-dot { background:#D4FF3F }
-  .ticker-row { animation: ticker 50s linear infinite }
-  @keyframes ticker { from{transform:translateX(0)} to{transform:translateX(-50%)} }
-  .grid-bg { background-image: linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px); background-size: 32px 32px; }
+  .win-burst { animation: burst 0.6s ease-out } @keyframes burst { 0%{transform:scale(.6); opacity:0} 60%{transform:scale(1.05); opacity:1} 100%{transform:scale(1); opacity:1} }
+  input[type=range].dark { -webkit-appearance:none; appearance:none; height:3px; background:#E5E5E5; border-radius:9999px; outline:none; }
+  input[type=range].dark::-webkit-slider-thumb { -webkit-appearance:none; appearance:none; width:20px; height:20px; border-radius:9999px; background:#0A0A0A; cursor:pointer; border:3px solid #FFFFFF; box-shadow: 0 0 0 1px #0A0A0A; }
+  .tap { transition: transform .12s ease, opacity .12s ease, background-color .15s ease, border-color .15s ease, box-shadow .15s ease } .tap:active { transform:scale(.98); opacity:.92 }
+  .nav-link { transition: color .12s ease; position:relative }
+  .nav-link.active { color:#0A0A0A; font-weight:600 }
+  .nav-link.active::after { content:''; position:absolute; bottom:-17px; left:0; right:0; height:2px; background:#0A0A0A; }
+  .product-card:hover .product-img { transform: scale(1.04) }
+  .product-img { transition: transform 0.4s ease; }
+  .product-card:hover .quick-btn { opacity:1; transform: translateY(0) }
+  .quick-btn { opacity:0; transform: translateY(6px); transition: all 0.2s ease; }
+  /* tile gradients per vertical */
+  .tile-sneakers     { background: linear-gradient(135deg, #FFE8B0 0%, #FFD17A 100%); }
+  .tile-tickets      { background: linear-gradient(135deg, #C8E0FF 0%, #99BFFF 100%); }
+  .tile-watches      { background: linear-gradient(135deg, #F0E4D0 0%, #D9C49B 100%); }
+  .tile-collectibles { background: linear-gradient(135deg, #E8DCFF 0%, #C4A8FF 100%); }
+  .tile-reservations { background: linear-gradient(135deg, #FFD9C9 0%, #FFB494 100%); }
+  .tile-auctions     { background: linear-gradient(135deg, #FFD0DC 0%, #FFA0B5 100%); }
+  .tile-travel       { background: linear-gradient(135deg, #C9F0E5 0%, #8EDFC8 100%); }
+  .tile-mints        { background: linear-gradient(135deg, #FFEFB8 0%, #FFD566 100%); }
   details > summary { list-style:none } details > summary::-webkit-details-marker { display:none }
-  .skel { background: linear-gradient(90deg, #15161A 0%, #23252B 50%, #15161A 100%); background-size:200% 100%; animation: shimmer 1.6s linear infinite }
-  @keyframes shimmer { from{background-position:200% 0} to{background-position:-200% 0} }
 </style>
 </head>
 <body class="min-h-screen">
 
 <!-- ============== TOP BAR ============== -->
-<header class="sticky top-0 z-30 bg-ink-950/85 backdrop-blur-xl border-b border-ink-800/70">
-  <div class="max-w-[1440px] mx-auto px-6 h-14 flex items-center gap-6">
-    <div class="flex items-center gap-2.5">
-      <div class="w-7 h-7 rounded-lg bg-acid grid place-items-center">
-        <svg viewBox="0 0 24 24" class="w-3.5 h-3.5" fill="none" stroke="#08080A" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z"/></svg>
+<header class="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-ink-200">
+  <div class="max-w-[1280px] mx-auto px-5 lg:px-8">
+    <!-- Row 1: brand + search + actions -->
+    <div class="h-16 flex items-center gap-6">
+      <a href="#" class="flex items-center gap-2 flex-shrink-0">
+        <div class="w-7 h-7 rounded-md bg-ink-950 grid place-items-center">
+          <svg viewBox="0 0 24 24" class="w-3.5 h-3.5" fill="none" stroke="#FFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z"/></svg>
+        </div>
+        <span class="font-extrabold tracking-tight text-lg">Snag</span>
+      </a>
+
+      <div class="hidden md:flex flex-1 max-w-xl">
+        <div class="relative w-full">
+          <svg viewBox="0 0 24 24" class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-400" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+          <input placeholder="Search drops, brands, or paste a link" class="w-full bg-ink-100 border border-transparent rounded-full pl-10 pr-4 py-2.5 text-sm placeholder:text-ink-500 focus:outline-none focus:bg-white focus:border-ink-300" />
+        </div>
       </div>
-      <span class="font-extrabold tracking-tight text-[15px]">STRIKE</span>
-      <span class="ml-2 text-[10px] px-1.5 py-0.5 rounded bg-ink-800 text-neutral-400 font-mono uppercase tracking-wider">beta</span>
+
+      <div class="flex items-center gap-3 ml-auto">
+        <button class="tap hidden md:flex items-center gap-1.5 text-sm font-medium text-ink-700 hover:text-ink-950">
+          <svg viewBox="0 0 24 24" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
+          <span class="text-xs">3</span>
+        </button>
+        <button onclick="openWallet()" class="tap flex items-center gap-2 px-3 py-1.5 rounded-full bg-ink-100 hover:bg-ink-200">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 pulse-dot"></span>
+          <span class="mono text-sm font-semibold">$<span id="walletBalance">412.50</span></span>
+        </button>
+        <button class="tap w-9 h-9 rounded-full bg-ink-950 text-white font-bold text-xs grid place-items-center">JK</button>
+      </div>
     </div>
 
-    <div class="flex-1 max-w-xl">
-      <div class="relative">
-        <svg viewBox="0 0 24 24" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
-        <input placeholder="Search drops, brands, events… or paste a link" class="w-full bg-ink-850 border border-ink-800 rounded-lg pl-9 pr-16 py-2 text-sm placeholder:text-neutral-500 focus:outline-none focus:border-ink-600" />
-        <kbd class="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-neutral-500 border border-ink-700 rounded px-1.5 py-0.5 mono">⌘ K</kbd>
-      </div>
-    </div>
-
-    <button onclick="openWallet()" class="tap flex items-center gap-2 px-3 py-1.5 rounded-full bg-ink-850 border border-ink-700 hover:border-ink-600">
-      <span class="w-1.5 h-1.5 rounded-full bg-acid pulse-dot"></span>
-      <span class="mono text-sm font-semibold">$<span id="walletBalance">412.50</span></span>
-      <span class="text-[10px] text-neutral-500 uppercase tracking-wider">USDC</span>
-    </button>
-    <button class="tap w-8 h-8 rounded-full bg-gradient-to-br from-acid to-acid-dim text-ink-950 font-bold text-xs grid place-items-center">JK</button>
+    <!-- Row 2: simple nav -->
+    <nav class="h-12 flex items-center gap-7 text-sm text-ink-500 overflow-x-auto scrollbar-hide">
+      <button onclick="setVertical('all')"          data-nav="all"          class="nav-link active flex-shrink-0">All drops</button>
+      <button onclick="setVertical('sneakers')"     data-nav="sneakers"     class="nav-link flex-shrink-0">Sneakers</button>
+      <button onclick="setVertical('tickets')"      data-nav="tickets"      class="nav-link flex-shrink-0">Tickets</button>
+      <button onclick="setVertical('watches')"      data-nav="watches"      class="nav-link flex-shrink-0">Watches</button>
+      <button onclick="setVertical('collectibles')" data-nav="collectibles" class="nav-link flex-shrink-0">Collectibles</button>
+      <button onclick="setVertical('reservations')" data-nav="reservations" class="nav-link flex-shrink-0">Reservations</button>
+      <button onclick="setVertical('auctions')"     data-nav="auctions"     class="nav-link flex-shrink-0">Auctions</button>
+      <button onclick="setVertical('travel')"       data-nav="travel"       class="nav-link flex-shrink-0">Travel</button>
+      <button onclick="setVertical('mints')"        data-nav="mints"        class="nav-link flex-shrink-0">Mints</button>
+      <span class="ml-auto text-xs text-ink-400 flex-shrink-0 hidden md:block"><span id="kpiArmed" class="mono font-semibold text-ink-700">3</span> agents armed</span>
+    </nav>
   </div>
 </header>
 
-<div class="max-w-[1440px] mx-auto flex">
-  <!-- ============== SIDEBAR ============== -->
-  <aside class="hidden md:block w-[224px] flex-shrink-0 sticky top-14 h-[calc(100vh-56px)] border-r border-ink-800/70 py-5 px-3">
-    <div class="space-y-0.5">
-      <div class="px-3 pb-1.5 text-[10px] uppercase tracking-[0.15em] text-neutral-600 font-bold">Drops</div>
-      <button onclick="setVertical('all')" data-nav="all" class="nav-item active w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium">
-        <span class="flex items-center gap-2.5"><span class="nav-dot w-1.5 h-1.5 rounded-full bg-ink-600"></span>All drops</span>
-        <span class="text-[11px] text-neutral-500 mono" id="cnt-all">—</span>
-      </button>
-      <button onclick="setVertical('sneakers')" data-nav="sneakers" class="nav-item w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium text-neutral-300 hover:bg-ink-850">
-        <span class="flex items-center gap-2.5"><span class="text-base">👟</span>Sneakers</span>
-        <span class="text-[11px] text-neutral-500 mono" id="cnt-sneakers">—</span>
-      </button>
-      <button onclick="setVertical('tickets')" data-nav="tickets" class="nav-item w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium text-neutral-300 hover:bg-ink-850">
-        <span class="flex items-center gap-2.5"><span class="text-base">🎟️</span>Tickets</span>
-        <span class="text-[11px] text-neutral-500 mono" id="cnt-tickets">—</span>
-      </button>
-      <button onclick="setVertical('watches')" data-nav="watches" class="nav-item w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium text-neutral-300 hover:bg-ink-850">
-        <span class="flex items-center gap-2.5"><span class="text-base">⌚</span>Watches</span>
-        <span class="text-[11px] text-neutral-500 mono" id="cnt-watches">—</span>
-      </button>
-      <button onclick="setVertical('collectibles')" data-nav="collectibles" class="nav-item w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium text-neutral-300 hover:bg-ink-850">
-        <span class="flex items-center gap-2.5"><span class="text-base">🃏</span>Collectibles</span>
-        <span class="text-[11px] text-neutral-500 mono" id="cnt-collectibles">—</span>
-      </button>
-      <button onclick="setVertical('reservations')" data-nav="reservations" class="nav-item w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium text-neutral-300 hover:bg-ink-850">
-        <span class="flex items-center gap-2.5"><span class="text-base">🍽️</span>Reservations</span>
-        <span class="text-[11px] text-neutral-500 mono" id="cnt-reservations">—</span>
-      </button>
-      <button onclick="setVertical('auctions')" data-nav="auctions" class="nav-item w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium text-neutral-300 hover:bg-ink-850">
-        <span class="flex items-center gap-2.5"><span class="text-base">🔨</span>Auctions</span>
-        <span class="text-[11px] text-neutral-500 mono" id="cnt-auctions">—</span>
-      </button>
-      <button onclick="setVertical('travel')" data-nav="travel" class="nav-item w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium text-neutral-300 hover:bg-ink-850">
-        <span class="flex items-center gap-2.5"><span class="text-base">✈️</span>Travel deals</span>
-        <span class="text-[11px] text-neutral-500 mono" id="cnt-travel">—</span>
-      </button>
-      <button onclick="setVertical('mints')" data-nav="mints" class="nav-item w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm font-medium text-neutral-300 hover:bg-ink-850">
-        <span class="flex items-center gap-2.5"><span class="text-base">🎨</span>Mints &amp; airdrops</span>
-        <span class="text-[11px] text-neutral-500 mono" id="cnt-mints">—</span>
-      </button>
-    </div>
-
-    <div class="mt-6 space-y-0.5">
-      <div class="px-3 pb-1.5 text-[10px] uppercase tracking-[0.15em] text-neutral-600 font-bold">Account</div>
-      <a href="#agents" class="nav-item w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium text-neutral-300 hover:bg-ink-850">
-        <svg viewBox="0 0 24 24" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
-        My agents
-      </a>
-      <button onclick="openWallet()" class="nav-item w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium text-neutral-300 hover:bg-ink-850">
-        <svg viewBox="0 0 24 24" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>
-        Wallet
-      </button>
-      <a class="nav-item w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium text-neutral-300 hover:bg-ink-850 cursor-pointer">
-        <svg viewBox="0 0 24 24" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 4 5-5"/></svg>
-        Activity
-      </a>
-      <a class="nav-item w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium text-neutral-300 hover:bg-ink-850 cursor-pointer">
-        <svg viewBox="0 0 24 24" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h0a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h0a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-        Settings
-      </a>
-    </div>
-
-    <div class="absolute bottom-5 left-3 right-3">
-      <div class="rounded-xl p-3 bg-gradient-to-br from-acid/10 to-transparent border border-acid/30">
-        <div class="text-[11px] uppercase tracking-wider text-acid font-bold">STRIKE Pro</div>
-        <div class="text-xs text-neutral-300 mt-1 leading-snug">Priority queue routing + 5× agent slots.</div>
-        <button class="tap mt-2 w-full bg-acid text-ink-950 font-bold py-1.5 rounded-lg text-xs">Upgrade</button>
+<!-- ============== HERO BANNER ============== -->
+<section class="border-b border-ink-200">
+  <div class="max-w-[1280px] mx-auto px-5 lg:px-8 py-10 lg:py-14 grid lg:grid-cols-[1.1fr_1fr] gap-10 items-center">
+    <div>
+      <div class="inline-flex items-center gap-2 text-xs font-semibold text-ink-700 bg-ink-100 px-3 py-1.5 rounded-full">
+        <span class="w-1.5 h-1.5 rounded-full bg-red-500 pulse-dot"></span>
+        18 drops in the next 24 hours
+      </div>
+      <h1 class="mt-5 text-4xl lg:text-5xl font-extrabold leading-[1.05] tracking-tight">
+        The drop happens.<br/>You don't have to.
+      </h1>
+      <p class="mt-4 text-base lg:text-lg text-ink-500 max-w-md leading-relaxed">
+        Pick what you want. We load a card with the exact amount and buy it the instant it goes live — sneakers, tickets, reservations, anything.
+      </p>
+      <div class="mt-7 flex flex-wrap gap-3">
+        <a href="#feed" class="tap inline-flex items-center gap-2 bg-ink-950 text-white font-semibold px-6 py-3 rounded-full text-sm hover:bg-ink-900">Browse drops →</a>
+        <button class="tap inline-flex items-center gap-2 bg-white border border-ink-300 text-ink-950 font-semibold px-6 py-3 rounded-full text-sm hover:bg-ink-50">How it works</button>
+      </div>
+      <div class="mt-7 flex items-center gap-5 text-xs text-ink-500">
+        <div class="flex items-center gap-1.5"><span class="w-1 h-1 rounded-full bg-emerald-500"></span>Card auto-expires after drop</div>
+        <div class="flex items-center gap-1.5"><span class="w-1 h-1 rounded-full bg-emerald-500"></span>Refund if it sells out</div>
+        <div class="flex items-center gap-1.5"><span class="w-1 h-1 rounded-full bg-emerald-500"></span>~400ms checkout</div>
       </div>
     </div>
-  </aside>
-
-  <!-- ============== MAIN ============== -->
-  <main class="flex-1 min-w-0">
-
-    <!-- Live ticker -->
-    <div class="border-b border-ink-800/70 bg-ink-925 overflow-hidden">
-      <div class="flex items-center gap-3 h-9 text-[12px] mono text-neutral-400 whitespace-nowrap">
-        <div class="px-4 flex items-center gap-2 border-r border-ink-800 h-full bg-ink-900 flex-shrink-0">
-          <span class="w-1.5 h-1.5 rounded-full bg-red-500 pulse-dot"></span>
-          <span class="font-bold text-neutral-200 text-[11px] uppercase tracking-wider">LIVE</span>
+    <div class="hidden lg:block relative">
+      <div class="aspect-[5/4] rounded-3xl overflow-hidden tile-sneakers relative">
+        <div class="absolute inset-0 grid place-items-center text-[180px]">👟</div>
+        <div class="absolute top-5 left-5 inline-flex items-center gap-1.5 bg-white/90 backdrop-blur px-2.5 py-1 rounded-full text-[11px] font-bold">
+          <span class="w-1.5 h-1.5 rounded-full bg-red-500 pulse-dot"></span> DROPPING SOON
         </div>
-        <div class="flex gap-8 ticker-row pl-4">
-          <span>🏆 @ramen_god struck <span class="text-acid">AJ4 Bred</span> · 0.4s</span>
-          <span>🎟️ 142 agents listening for <span class="text-acid">Taylor — Tokyo</span></span>
-          <span>⌚ <span class="text-acid">Rolex Daytona</span> AD waitlist opens in 02:14:09</span>
-          <span>🍽️ <span class="text-acid">Carbone</span> Sat 8pm — 9 agents armed</span>
-          <span>🃏 <span class="text-acid">Pokémon 151 ETB</span> restock — 5 wins in last hour</span>
-          <span>🔨 Sotheby's lot <span class="text-acid">#A442</span> ends in 18:21</span>
-          <span>🏆 @ramen_god struck <span class="text-acid">AJ4 Bred</span> · 0.4s</span>
-          <span>🎟️ 142 agents listening for <span class="text-acid">Taylor — Tokyo</span></span>
-          <span>⌚ <span class="text-acid">Rolex Daytona</span> AD waitlist opens in 02:14:09</span>
-          <span>🍽️ <span class="text-acid">Carbone</span> Sat 8pm — 9 agents armed</span>
-          <span>🃏 <span class="text-acid">Pokémon 151 ETB</span> restock — 5 wins in last hour</span>
-          <span>🔨 Sotheby's lot <span class="text-acid">#A442</span> ends in 18:21</span>
-        </div>
-      </div>
-    </div>
-
-    <div class="px-6 py-6 lg:px-8 lg:py-8 space-y-8">
-
-      <!-- Welcome + KPIs -->
-      <section class="flex items-end justify-between flex-wrap gap-4">
-        <div>
-          <div class="text-xs text-neutral-500 uppercase tracking-wider font-semibold">Good evening, Jordan</div>
-          <h1 class="text-3xl font-extrabold mt-1 leading-tight">Pick something worth winning.</h1>
-        </div>
-        <div class="flex gap-2">
-          <div class="px-4 py-2.5 rounded-xl bg-ink-850 border border-ink-800">
-            <div class="text-[10px] uppercase tracking-wider text-neutral-500 font-semibold">Agents armed</div>
-            <div class="mono text-lg font-bold mt-0.5"><span id="kpiArmed">3</span></div>
-          </div>
-          <div class="px-4 py-2.5 rounded-xl bg-ink-850 border border-ink-800">
-            <div class="text-[10px] uppercase tracking-wider text-neutral-500 font-semibold">Win rate</div>
-            <div class="mono text-lg font-bold mt-0.5 text-acid">68%</div>
-          </div>
-          <div class="px-4 py-2.5 rounded-xl bg-ink-850 border border-ink-800">
-            <div class="text-[10px] uppercase tracking-wider text-neutral-500 font-semibold">Saved vs resale</div>
-            <div class="mono text-lg font-bold mt-0.5">$3,184</div>
-          </div>
-        </div>
-      </section>
-
-      <!-- Active Agents -->
-      <section>
-        <div class="flex items-center justify-between mb-3">
-          <h2 class="text-[11px] uppercase tracking-[0.15em] text-neutral-500 font-bold">Your agents</h2>
-          <button class="text-[11px] text-neutral-400 hover:text-neutral-200">Manage all →</button>
-        </div>
-        <div id="agentsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3"></div>
-      </section>
-
-      <!-- HERO Next drop -->
-      <section>
-        <div class="flex items-center justify-between mb-3">
-          <h2 class="text-[11px] uppercase tracking-[0.15em] text-neutral-500 font-bold">Featured · drops next</h2>
-          <span class="text-[11px] text-neutral-500">Curated</span>
-        </div>
-        <div id="hero" class="hero-grad rounded-2xl border border-ink-800 overflow-hidden grid grid-cols-1 lg:grid-cols-[1.1fr_1fr]">
-          <!-- left -->
-          <div class="p-6 lg:p-8 flex flex-col justify-between gap-6">
+        <div class="absolute bottom-5 left-5 right-5 bg-white rounded-2xl p-4 shadow-pop">
+          <div class="text-[10px] uppercase tracking-wider text-ink-500 font-bold">Nike SNKRS</div>
+          <div class="font-bold mt-0.5">Air Jordan 4 "Bred Reimagined"</div>
+          <div class="flex items-center justify-between mt-2">
             <div>
-              <div class="flex items-center gap-2">
-                <div class="text-[10px] uppercase tracking-wider font-bold text-acid px-2 py-0.5 rounded bg-acid/10 border border-acid/30" id="heroBrand">NIKE SNKRS</div>
-                <span class="text-[10px] uppercase font-bold bg-red-500/15 text-red-400 px-1.5 py-0.5 rounded">HOT</span>
-              </div>
-              <h2 class="text-2xl lg:text-3xl font-extrabold leading-tight mt-3" id="heroTitle">Air Jordan 4 "Bred Reimagined"</h2>
-              <p class="text-sm text-neutral-400 mt-2" id="heroMeta">Retail $215 · Sizes 7–13 · Median resale $487</p>
+              <div class="text-[10px] text-ink-500">Drops in</div>
+              <div class="mono font-bold" id="heroCountdown">04:12:18</div>
             </div>
-            <div class="flex items-end justify-between flex-wrap gap-4">
-              <div>
-                <div class="text-[10px] uppercase tracking-wider text-neutral-500 font-bold">Drops in</div>
-                <div class="mono text-4xl font-extrabold mt-1" id="heroCountdown">00:00:00</div>
-                <div class="flex gap-3 mt-2 text-[11px] text-neutral-500">
-                  <span class="flex items-center gap-1.5"><span class="w-1 h-1 rounded-full bg-acid"></span> <span class="mono text-neutral-300" id="heroArmed">218</span> armed</span>
-                  <span class="flex items-center gap-1.5"><span class="w-1 h-1 rounded-full bg-blue-400"></span> <span class="mono text-neutral-300">62%</span> est. win</span>
-                </div>
-              </div>
-              <button onclick="openPrime('featured')" class="tap bg-acid text-ink-950 font-bold px-6 py-3.5 rounded-xl text-sm ring-acid">Prime agent →</button>
+            <div class="text-right">
+              <div class="text-[10px] text-ink-500">Retail</div>
+              <div class="mono font-bold">$215</div>
             </div>
-          </div>
-          <!-- right artwork panel -->
-          <div class="hidden lg:flex relative items-center justify-center bg-ink-900 border-l border-ink-800 grid-bg">
-            <div class="text-[160px] leading-none">👟</div>
-            <div class="absolute top-4 right-4 flex flex-col items-end gap-1">
-              <div class="text-[10px] uppercase tracking-wider text-neutral-500">Demand index</div>
-              <div class="mono text-2xl font-bold text-acid">9.4<span class="text-neutral-500 text-base">/10</span></div>
-            </div>
+            <button onclick="openPrime('aj4')" class="tap bg-ink-950 text-white font-semibold px-4 py-2 rounded-full text-xs">Auto-buy →</button>
           </div>
         </div>
-      </section>
-
-      <!-- Dropping Today -->
-      <section>
-        <div class="flex items-center justify-between mb-3">
-          <div class="flex items-center gap-3">
-            <h2 class="text-[11px] uppercase tracking-[0.15em] text-neutral-500 font-bold" id="feedTitleA">Dropping today</h2>
-            <span class="text-[11px] text-neutral-600">·</span>
-            <span class="text-[11px] text-neutral-500"><span id="feedCount">0</span> events</span>
-          </div>
-          <div class="flex gap-1 p-1 rounded-lg bg-ink-850 border border-ink-800">
-            <button onclick="setSort('time')" id="sort-time" class="px-2.5 py-1 text-[11px] font-semibold rounded-md bg-ink-700">Soonest</button>
-            <button onclick="setSort('demand')" id="sort-demand" class="px-2.5 py-1 text-[11px] font-semibold text-neutral-400 rounded-md">Most armed</button>
-            <button onclick="setSort('value')" id="sort-value" class="px-2.5 py-1 text-[11px] font-semibold text-neutral-400 rounded-md">Highest margin</button>
-          </div>
-        </div>
-        <div id="todayGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3"></div>
-      </section>
-
-      <!-- This week -->
-      <section>
-        <h2 class="text-[11px] uppercase tracking-[0.15em] text-neutral-500 font-bold mb-3">This week</h2>
-        <div class="rounded-xl border border-ink-800 overflow-hidden">
-          <div class="grid grid-cols-[1fr_120px_120px_120px_120px_120px] gap-3 px-4 py-2.5 text-[10px] uppercase tracking-wider text-neutral-500 font-bold border-b border-ink-800 bg-ink-900">
-            <div>Drop</div><div>Vertical</div><div>Drops in</div><div>Retail</div><div>Demand</div><div></div>
-          </div>
-          <div id="weekList"></div>
-        </div>
-      </section>
-
-      <!-- How it works -->
-      <section class="rounded-2xl border border-ink-800 bg-ink-900/50 p-6 lg:p-8">
-        <div class="flex items-center justify-between mb-5">
-          <h2 class="text-lg font-bold">How a STRIKE works</h2>
-          <a class="text-[11px] text-neutral-500 hover:text-neutral-200 cursor-pointer">Watch demo →</a>
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div class="rounded-xl bg-ink-850 border border-ink-800 p-4">
-            <div class="mono text-[11px] text-acid font-bold">01</div>
-            <div class="mt-2 font-semibold text-sm">Pick a drop</div>
-            <div class="text-xs text-neutral-400 mt-1 leading-relaxed">Browse curated drops or paste any URL. Set size, max price, and limits.</div>
-          </div>
-          <div class="rounded-xl bg-ink-850 border border-ink-800 p-4">
-            <div class="mono text-[11px] text-acid font-bold">02</div>
-            <div class="mt-2 font-semibold text-sm">Fund via onramp</div>
-            <div class="text-xs text-neutral-400 mt-1 leading-relaxed">Apple Pay → USDC in one sheet. We calculate the exact load amount including slippage.</div>
-          </div>
-          <div class="rounded-xl bg-ink-850 border border-ink-800 p-4">
-            <div class="mono text-[11px] text-acid font-bold">03</div>
-            <div class="mt-2 font-semibold text-sm">Card materializes</div>
-            <div class="text-xs text-neutral-400 mt-1 leading-relaxed">A single-use virtual debit card is issued, capped to your max, expiring after the drop.</div>
-          </div>
-          <div class="rounded-xl bg-ink-850 border border-ink-800 p-4">
-            <div class="mono text-[11px] text-acid font-bold">04</div>
-            <div class="mt-2 font-semibold text-sm">Agent strikes</div>
-            <div class="text-xs text-neutral-400 mt-1 leading-relaxed">Headless agent queues, solves captcha, checks out in ~400ms. Unspent USDC returns instantly.</div>
-          </div>
-        </div>
-      </section>
-
-      <footer class="text-center text-[11px] text-neutral-600 pt-4 pb-12">
-        STRIKE is a prototype. Card issuance by Lithic · USDC rails by Circle · Stripe onramp.
-      </footer>
+      </div>
     </div>
-  </main>
-</div>
+  </div>
+</section>
 
-<!-- ============== PRIME AGENT MODAL ============== -->
-<div id="primeModal" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-sm fade-in">
+<!-- ============== ACTIVE AGENTS (only visible if any) ============== -->
+<section id="agentsBar" class="border-b border-ink-200 bg-ink-50">
+  <div class="max-w-[1280px] mx-auto px-5 lg:px-8 py-5">
+    <div class="flex items-center justify-between mb-3">
+      <div class="flex items-center gap-2">
+        <h2 class="text-sm font-bold">Your active agents</h2>
+        <span class="text-xs text-ink-500"><span id="agentCount">3</span> running</span>
+      </div>
+      <button class="text-xs font-semibold text-ink-700 hover:text-ink-950">Manage all →</button>
+    </div>
+    <div id="agentsRow" class="flex gap-3 overflow-x-auto scrollbar-hide -mx-5 px-5 lg:-mx-8 lg:px-8"></div>
+  </div>
+</section>
+
+<!-- ============== FILTERS + GRID ============== -->
+<section id="feed" class="max-w-[1280px] mx-auto px-5 lg:px-8 py-10">
+  <div class="flex items-center justify-between flex-wrap gap-3 mb-6">
+    <div>
+      <h2 class="text-2xl font-bold tracking-tight" id="feedTitle">All drops</h2>
+      <p class="text-sm text-ink-500 mt-1"><span id="feedCount">0</span> upcoming · refreshed live</p>
+    </div>
+    <div class="flex items-center gap-2">
+      <div class="flex items-center gap-1 text-xs text-ink-500">Sort</div>
+      <select onchange="setSort(this.value)" class="bg-white border border-ink-300 rounded-full px-3 py-2 text-sm font-medium focus:outline-none focus:border-ink-950">
+        <option value="time">Soonest</option>
+        <option value="demand">Most popular</option>
+        <option value="value">Best margin</option>
+        <option value="price-low">Price: low to high</option>
+        <option value="price-high">Price: high to low</option>
+      </select>
+    </div>
+  </div>
+
+  <div id="grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-5 gap-y-10"></div>
+
+  <div id="empty" class="hidden text-center py-20 text-ink-500 text-sm">No drops match this filter.</div>
+</section>
+
+<!-- ============== HOW IT WORKS ============== -->
+<section class="border-t border-ink-200 bg-ink-50">
+  <div class="max-w-[1280px] mx-auto px-5 lg:px-8 py-14">
+    <div class="text-center max-w-xl mx-auto">
+      <h2 class="text-3xl font-bold tracking-tight">Four steps. Zero refreshing.</h2>
+      <p class="mt-2 text-ink-500">Snag is a checkout agent. You set the rules, it buys when the moment hits.</p>
+    </div>
+    <div class="mt-10 grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div class="bg-white border border-ink-200 rounded-2xl p-5">
+        <div class="w-8 h-8 rounded-full bg-ink-950 text-white text-sm font-bold grid place-items-center">1</div>
+        <div class="mt-3 font-semibold">Pick a drop</div>
+        <div class="mt-1 text-sm text-ink-500 leading-relaxed">Browse curated drops or paste a link. Set size, max price, party size — whatever applies.</div>
+      </div>
+      <div class="bg-white border border-ink-200 rounded-2xl p-5">
+        <div class="w-8 h-8 rounded-full bg-ink-950 text-white text-sm font-bold grid place-items-center">2</div>
+        <div class="mt-3 font-semibold">Fund with Apple Pay</div>
+        <div class="mt-1 text-sm text-ink-500 leading-relaxed">Apple Pay → USDC in one tap. We calculate the exact amount, tax, fees, and a 3% buffer.</div>
+      </div>
+      <div class="bg-white border border-ink-200 rounded-2xl p-5">
+        <div class="w-8 h-8 rounded-full bg-ink-950 text-white text-sm font-bold grid place-items-center">3</div>
+        <div class="mt-3 font-semibold">A card spins up</div>
+        <div class="mt-1 text-sm text-ink-500 leading-relaxed">A single-use virtual card is issued, hard-capped at your max, expiring after the drop.</div>
+      </div>
+      <div class="bg-white border border-ink-200 rounded-2xl p-5">
+        <div class="w-8 h-8 rounded-full bg-ink-950 text-white text-sm font-bold grid place-items-center">4</div>
+        <div class="mt-3 font-semibold">We check out for you</div>
+        <div class="mt-1 text-sm text-ink-500 leading-relaxed">~400ms checkout. You get a push. Unspent USDC returns to your wallet instantly.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============== FOOTER ============== -->
+<footer class="border-t border-ink-200 bg-white">
+  <div class="max-w-[1280px] mx-auto px-5 lg:px-8 py-10 text-center text-xs text-ink-500">
+    Snag · prototype · card issuance by Lithic · USDC by Circle · Apple Pay via Stripe
+  </div>
+</footer>
+
+<!-- ============== PRIME / AUTO-BUY MODAL ============== -->
+<div id="primeModal" class="hidden fixed inset-0 z-50 bg-black/40 backdrop-blur-sm fade-in">
   <div class="absolute inset-0 grid place-items-center p-4">
-    <div class="w-full max-w-[640px] bg-ink-900 rounded-2xl border border-ink-700/70 modal-enter max-h-[92vh] overflow-y-auto scrollbar-hide">
-      <div class="sticky top-0 bg-ink-900/95 backdrop-blur px-6 pt-4 pb-3 flex items-center justify-between border-b border-ink-800">
+    <div class="w-full max-w-[520px] bg-white rounded-2xl shadow-pop modal-enter max-h-[92vh] overflow-y-auto scrollbar-hide">
+      <div class="sticky top-0 bg-white/95 backdrop-blur px-5 pt-4 pb-3 flex items-center justify-between border-b border-ink-200">
         <div class="flex items-center gap-3">
           <div class="flex items-center gap-1.5" id="primeSteps">
-            <div class="w-7 h-1 rounded-full bg-acid"></div>
-            <div class="w-7 h-1 rounded-full bg-ink-700"></div>
-            <div class="w-7 h-1 rounded-full bg-ink-700"></div>
+            <div class="w-6 h-1 rounded-full bg-ink-950"></div>
+            <div class="w-6 h-1 rounded-full bg-ink-200"></div>
+            <div class="w-6 h-1 rounded-full bg-ink-200"></div>
           </div>
-          <span class="text-[11px] text-neutral-500 mono" id="stepLabel">STEP 1 / 3 · Configure</span>
+          <span class="text-xs text-ink-500" id="stepLabel">1 of 3 · Configure</span>
         </div>
-        <button onclick="closePrime()" class="w-8 h-8 grid place-items-center rounded-lg hover:bg-ink-800 text-neutral-500 text-xl leading-none">×</button>
+        <button onclick="closePrime()" class="w-8 h-8 grid place-items-center rounded-full hover:bg-ink-100 text-ink-500 text-xl leading-none">×</button>
       </div>
-      <div id="primeBody" class="p-6"></div>
+      <div id="primeBody" class="p-5"></div>
     </div>
   </div>
 </div>
 
 <!-- ============== WIN OVERLAY ============== -->
-<div id="winOverlay" class="hidden fixed inset-0 z-[60] bg-ink-950/95 backdrop-blur-md grid place-items-center fade-in">
-  <div class="max-w-[460px] w-full px-6 text-center win-burst">
-    <div class="text-7xl mb-4">🏆</div>
-    <div class="text-acid text-xs uppercase tracking-[0.3em] font-bold">Strike successful</div>
-    <h2 class="text-3xl font-extrabold mt-2" id="winTitle">You got 'em.</h2>
-    <p class="text-neutral-400 mt-2 text-sm" id="winSub">Order #SNK-44829 confirmed in 0.4s</p>
-    <div class="mt-6 bg-ink-850 border border-ink-700 rounded-2xl p-4 text-left">
-      <div class="flex justify-between text-sm"><span class="text-neutral-400">Charged</span><span class="mono font-semibold" id="winCharged">$236.81</span></div>
-      <div class="flex justify-between text-sm mt-2"><span class="text-neutral-400">Refunded slippage</span><span class="mono font-semibold text-acid" id="winRefund">+$10.37</span></div>
-      <div class="flex justify-between text-sm mt-2"><span class="text-neutral-400">Tracking / confirmation</span><span class="mono font-semibold" id="winTrack">1Z999AA10123</span></div>
+<div id="winOverlay" class="hidden fixed inset-0 z-[60] bg-white/95 backdrop-blur-md grid place-items-center fade-in">
+  <div class="max-w-[440px] w-full px-6 text-center win-burst">
+    <div class="text-6xl mb-3">🎉</div>
+    <div class="text-emerald-600 text-xs uppercase tracking-[0.2em] font-bold">Order placed</div>
+    <h2 class="text-3xl font-bold tracking-tight mt-2" id="winTitle">It's yours.</h2>
+    <p class="text-ink-500 mt-2 text-sm" id="winSub">Confirmed in 0.4s</p>
+    <div class="mt-6 bg-ink-50 border border-ink-200 rounded-2xl p-4 text-left">
+      <div class="flex justify-between text-sm"><span class="text-ink-500">Charged</span><span class="mono font-semibold" id="winCharged">$236.81</span></div>
+      <div class="flex justify-between text-sm mt-2"><span class="text-ink-500">Refunded slippage</span><span class="mono font-semibold text-emerald-600" id="winRefund">+$10.37</span></div>
+      <div class="flex justify-between text-sm mt-2"><span class="text-ink-500">Tracking / confirmation</span><span class="mono font-semibold" id="winTrack">1Z999AA10123</span></div>
     </div>
     <div class="grid grid-cols-2 gap-2 mt-4">
-      <button onclick="closeWin()" class="tap bg-ink-800 border border-ink-700 py-3 rounded-xl font-semibold text-sm">Close</button>
-      <button onclick="closeWin()" class="tap bg-acid text-ink-950 py-3 rounded-xl font-bold text-sm">Share the W</button>
+      <button onclick="closeWin()" class="tap bg-white border border-ink-300 py-3 rounded-full font-semibold text-sm">Close</button>
+      <button onclick="closeWin()" class="tap bg-ink-950 text-white py-3 rounded-full font-semibold text-sm">Share</button>
     </div>
   </div>
 </div>
 
 <!-- ============== WALLET MODAL ============== -->
-<div id="walletSheet" class="hidden fixed inset-0 z-50 bg-black/70 backdrop-blur-sm fade-in">
+<div id="walletSheet" class="hidden fixed inset-0 z-50 bg-black/40 backdrop-blur-sm fade-in">
   <div class="absolute inset-0 grid place-items-center p-4">
-    <div class="w-full max-w-[520px] bg-ink-900 rounded-2xl border border-ink-700/70 modal-enter">
-      <div class="px-6 pt-4 pb-3 flex items-center justify-between border-b border-ink-800">
+    <div class="w-full max-w-[460px] bg-white rounded-2xl shadow-pop modal-enter">
+      <div class="px-5 pt-4 pb-3 flex items-center justify-between border-b border-ink-200">
         <h3 class="font-bold">Wallet</h3>
-        <button onclick="closeWallet()" class="w-8 h-8 grid place-items-center rounded-lg hover:bg-ink-800 text-neutral-500 text-xl leading-none">×</button>
+        <button onclick="closeWallet()" class="w-8 h-8 grid place-items-center rounded-full hover:bg-ink-100 text-ink-500 text-xl leading-none">×</button>
       </div>
-      <div class="p-6">
-        <div class="text-xs text-neutral-500 uppercase tracking-wider">USDC balance</div>
+      <div class="p-5">
+        <div class="text-xs text-ink-500 uppercase tracking-wider">Balance</div>
         <div class="mono text-4xl font-bold mt-1">$412.50</div>
         <div class="grid grid-cols-2 gap-2 mt-5">
-          <button class="tap bg-acid text-ink-950 font-bold py-3 rounded-xl text-sm">Top up</button>
-          <button class="tap bg-ink-800 border border-ink-700 py-3 rounded-xl font-semibold text-sm">Cash out</button>
+          <button class="tap bg-ink-950 text-white font-semibold py-3 rounded-full text-sm">Add funds</button>
+          <button class="tap bg-white border border-ink-300 py-3 rounded-full font-semibold text-sm">Cash out</button>
         </div>
-        <div class="mt-6 text-[11px] uppercase tracking-wider text-neutral-500 font-bold">Recent activity</div>
+        <div class="mt-6 text-xs uppercase tracking-wider text-ink-500 font-bold">Recent activity</div>
         <div class="mt-2 space-y-1">
-          <div class="flex items-center justify-between py-2.5 border-b border-ink-800">
-            <div><div class="text-sm font-semibold">SNKRS — AJ4 Bred</div><div class="text-[11px] text-neutral-500">Card primed · 2m ago</div></div>
-            <span class="mono text-sm text-red-400">-$236.81</span>
+          <div class="flex items-center justify-between py-2.5 border-b border-ink-100">
+            <div><div class="text-sm font-semibold">AJ4 Bred — card primed</div><div class="text-[11px] text-ink-500">2m ago</div></div>
+            <span class="mono text-sm text-red-500">-$236.81</span>
           </div>
-          <div class="flex items-center justify-between py-2.5 border-b border-ink-800">
-            <div><div class="text-sm font-semibold">Apple Pay top-up</div><div class="text-[11px] text-neutral-500">via Stripe · 5m ago</div></div>
-            <span class="mono text-sm text-acid">+$500.00</span>
+          <div class="flex items-center justify-between py-2.5 border-b border-ink-100">
+            <div><div class="text-sm font-semibold">Apple Pay top-up</div><div class="text-[11px] text-ink-500">5m ago</div></div>
+            <span class="mono text-sm text-emerald-600">+$500.00</span>
           </div>
-          <div class="flex items-center justify-between py-2.5 border-b border-ink-800">
-            <div><div class="text-sm font-semibold">Refund — Travis Tix</div><div class="text-[11px] text-neutral-500">Sold out · yesterday</div></div>
-            <span class="mono text-sm text-acid">+$420.00</span>
+          <div class="flex items-center justify-between py-2.5">
+            <div><div class="text-sm font-semibold">Refund — Travis Tix sold out</div><div class="text-[11px] text-ink-500">yesterday</div></div>
+            <span class="mono text-sm text-emerald-600">+$420.00</span>
           </div>
         </div>
       </div>
@@ -409,80 +315,86 @@ tailwind.config = {
    DATA
 ========================= */
 const NOW = Date.now();
-const t = (h, m=0) => new Date(NOW + h*3600000 + m*60000);
+const t = (h, m=0, s=0) => new Date(NOW + h*3600000 + m*60000 + s*1000);
 
 const VERTICALS = {
-  sneakers:     { label:'Sneakers',     color:'#D4FF3F', accent:'text-acid',       chip:'bg-acid/10 text-acid border-acid/30',           icon:'👟' },
-  tickets:      { label:'Tickets',      color:'#59A0FF', accent:'text-blue-400',   chip:'bg-blue-500/10 text-blue-400 border-blue-500/30', icon:'🎟️' },
-  watches:      { label:'Watches',      color:'#E0B870', accent:'text-amber-300',  chip:'bg-amber-500/10 text-amber-300 border-amber-500/30', icon:'⌚' },
-  collectibles: { label:'Collectibles', color:'#B388FF', accent:'text-purple-300', chip:'bg-purple-500/10 text-purple-300 border-purple-500/30', icon:'🃏' },
-  reservations: { label:'Reservations', color:'#FF8A65', accent:'text-orange-300', chip:'bg-orange-500/10 text-orange-300 border-orange-500/30', icon:'🍽️' },
-  auctions:     { label:'Auctions',     color:'#FF5C7C', accent:'text-rose-300',   chip:'bg-rose-500/10 text-rose-300 border-rose-500/30', icon:'🔨' },
-  travel:       { label:'Travel',       color:'#5DE8C9', accent:'text-teal-300',   chip:'bg-teal-500/10 text-teal-300 border-teal-500/30', icon:'✈️' },
-  mints:        { label:'Mints',        color:'#FFC857', accent:'text-yellow-300', chip:'bg-yellow-500/10 text-yellow-300 border-yellow-500/30', icon:'🎨' },
+  sneakers:     { label:'Sneakers'    , tile:'tile-sneakers' },
+  tickets:      { label:'Tickets'     , tile:'tile-tickets' },
+  watches:      { label:'Watches'     , tile:'tile-watches' },
+  collectibles: { label:'Collectibles', tile:'tile-collectibles' },
+  reservations: { label:'Reservations', tile:'tile-reservations' },
+  auctions:     { label:'Auctions'    , tile:'tile-auctions' },
+  travel:       { label:'Travel'      , tile:'tile-travel' },
+  mints:        { label:'Mints'       , tile:'tile-mints' },
 };
 
 const ALL_DROPS = [
-  // Sneakers
-  { id:'aj4',  v:'sneakers',     brand:'NIKE SNKRS',     title:'Air Jordan 4 "Bred Reimagined"',      img:'👟', price:215, meta:'Retail $215 · Sizes 7–13',           dropsAt:t(0,18),  hot:true,  armed:218, demand:9.4, sizes:['7','8','8.5','9','9.5','10','10.5','11','12','13'] },
-  { id:'yz',   v:'sneakers',     brand:'YEEZY SUPPLY',   title:'Yeezy 350 V2 "Onyx"',                 img:'🥾', price:230, meta:'Retail $230 · Sizes 5–14',           dropsAt:t(9,5),   armed:64, demand:6.1, sizes:['7','8','9','10','11','12'] },
-  { id:'dunk', v:'sneakers',     brand:'NIKE SNKRS',     title:'Dunk Low "Panda" Restock',            img:'👟', price:115, meta:'Retail $115 · Sizes 6–13',           dropsAt:t(2,22),  hot:true,  armed:412, demand:8.8, sizes:['7','8','9','10','11','12'] },
-  { id:'sb',   v:'sneakers',     brand:'NIKE SB',        title:'SB Dunk × Concepts "Purple Lobster"', img:'🦞', price:130, meta:'Retail $130 · Limited',             dropsAt:t(32),    armed:189, demand:8.2, sizes:['8','9','10','11','12'] },
-  { id:'nb',   v:'sneakers',     brand:'NEW BALANCE',    title:'990v6 × Joe Freshgoods',              img:'👟', price:240, meta:'Retail $240',                       dropsAt:t(48),    armed:97,  demand:7.0, sizes:['8','9','10','11','12'] },
+  { id:'aj4',  v:'sneakers',     brand:'Nike SNKRS',      title:'Air Jordan 4 "Bred Reimagined"',     emoji:'👟', price:215,   meta:'Sizes 7–13',                 dropsAt:t(0,18),  hot:true,  armed:218, demand:9.4, sizes:['7','8','8.5','9','9.5','10','10.5','11','12','13'] },
+  { id:'yz',   v:'sneakers',     brand:'Yeezy Supply',    title:'Yeezy 350 V2 "Onyx"',                emoji:'🥾', price:230,   meta:'Sizes 5–14',                 dropsAt:t(9,5),   armed:64,  demand:6.1, sizes:['7','8','9','10','11','12'] },
+  { id:'dunk', v:'sneakers',     brand:'Nike SNKRS',      title:'Dunk Low "Panda" Restock',           emoji:'👟', price:115,   meta:'Sizes 6–13',                 dropsAt:t(2,22),  hot:true,  armed:412, demand:8.8, sizes:['7','8','9','10','11','12'] },
+  { id:'sb',   v:'sneakers',     brand:'Nike SB',         title:'SB Dunk × Concepts "Purple Lobster"',emoji:'🦞', price:130,   meta:'Limited',                    dropsAt:t(32),    armed:189, demand:8.2, sizes:['8','9','10','11','12'] },
+  { id:'nb',   v:'sneakers',     brand:'New Balance',     title:'990v6 × Joe Freshgoods',             emoji:'👟', price:240,   meta:'All sizes',                  dropsAt:t(48),    armed:97,  demand:7.0, sizes:['8','9','10','11','12'] },
 
-  // Tickets
-  { id:'tay',  v:'tickets',      brand:'TICKETMASTER',   title:'Taylor Swift — Eras Tour Tokyo',      img:'🎤', price:420, meta:'Sec 102 · 2 ticket max',            dropsAt:t(2,35),  hot:true,  armed:1842, demand:9.9, sizes:['Floor','Sec 100s','Sec 200s','Sec 300s'] },
-  { id:'kc',   v:'tickets',      brand:'AXS',            title:'Kendrick Lamar — MSG Night 2',        img:'🎶', price:280, meta:'2 ticket max',                      dropsAt:t(6,12),  armed:524, demand:8.4, sizes:['Floor','100s','200s','300s'] },
-  { id:'f1',   v:'tickets',      brand:'F1 OFFICIAL',    title:'F1 Las Vegas GP — Grandstand',        img:'🏁', price:950, meta:'3-day pass',                        dropsAt:t(18),    hot:true,  armed:308, demand:8.7, sizes:['Main','T-Mobile','Sphere'] },
-  { id:'nba',  v:'tickets',      brand:'NBA TIX',        title:'Lakers vs Celtics — Finals G1',       img:'🏀', price:680, meta:'Crypto.com Arena',                  dropsAt:t(28),    armed:712, demand:9.1, sizes:['Lower','Upper','Premier'] },
-  { id:'cm',   v:'tickets',      brand:'COACHELLA',      title:'Coachella W1 — GA + Shuttle',         img:'🌵', price:599, meta:'Empire Polo Club',                  dropsAt:t(52),    armed:201, demand:7.6, sizes:['GA','GA+','VIP'] },
+  { id:'tay',  v:'tickets',      brand:'Ticketmaster',    title:'Taylor Swift — Eras Tour Tokyo',     emoji:'🎤', price:420,   meta:'2 ticket max',               dropsAt:t(2,35),  hot:true,  armed:1842,demand:9.9, sizes:['Floor','Sec 100s','Sec 200s','Sec 300s'] },
+  { id:'kc',   v:'tickets',      brand:'AXS',             title:'Kendrick Lamar — MSG Night 2',       emoji:'🎶', price:280,   meta:'2 ticket max',               dropsAt:t(6,12),  armed:524, demand:8.4, sizes:['Floor','100s','200s','300s'] },
+  { id:'f1',   v:'tickets',      brand:'F1 Official',     title:'F1 Las Vegas GP — Grandstand',       emoji:'🏁', price:950,   meta:'3-day pass',                 dropsAt:t(18),    hot:true,  armed:308, demand:8.7, sizes:['Main','T-Mobile','Sphere'] },
+  { id:'nba',  v:'tickets',      brand:'NBA Tix',         title:'Lakers vs Celtics — Finals G1',      emoji:'🏀', price:680,   meta:'Crypto.com Arena',           dropsAt:t(28),    armed:712, demand:9.1, sizes:['Lower','Upper','Premier'] },
+  { id:'cm',   v:'tickets',      brand:'Coachella',       title:'Coachella W1 — GA + Shuttle',        emoji:'🌵', price:599,   meta:'Empire Polo Club',           dropsAt:t(52),    armed:201, demand:7.6, sizes:['GA','GA+','VIP'] },
 
-  // Watches
-  { id:'rdayt',v:'watches',      brand:'ROLEX (HODINKEE)',title:'Daytona 126500LN — AD Allocation',   img:'⌚', price:15100, meta:'Authorized dealer waitlist',       dropsAt:t(3,8),   hot:true,  armed:88, demand:9.7, sizes:['White','Black'] },
-  { id:'tudor',v:'watches',      brand:'TUDOR',          title:'Black Bay 58 GMT — First Release',    img:'⌚', price:4350,  meta:'Boutique only',                    dropsAt:t(14),    armed:54, demand:7.9, sizes:['Standard'] },
-  { id:'omega',v:'watches',      brand:'SWATCH × OMEGA', title:'MoonSwatch "Mission to Pluto"',       img:'🌑', price:260,   meta:'In-store + online',                dropsAt:t(20,15), armed:622, demand:8.6, sizes:['One size'] },
-  { id:'gshk', v:'watches',      brand:'G-SHOCK',        title:'MR-G × Frogman Titanium',             img:'⌚', price:3500,  meta:'Limited 700 units',                dropsAt:t(50),    armed:31, demand:6.4, sizes:['One size'] },
+  { id:'rdayt',v:'watches',      brand:'Rolex (via Hodinkee)', title:'Daytona 126500LN — AD Allocation', emoji:'⌚', price:15100,meta:'AD waitlist',             dropsAt:t(3,8),   hot:true,  armed:88,  demand:9.7, sizes:['White','Black'] },
+  { id:'tudor',v:'watches',      brand:'Tudor',           title:'Black Bay 58 GMT — First Release',   emoji:'⌚', price:4350,  meta:'Boutique only',              dropsAt:t(14),    armed:54,  demand:7.9, sizes:['Standard'] },
+  { id:'omega',v:'watches',      brand:'Swatch × Omega',  title:'MoonSwatch "Mission to Pluto"',      emoji:'🌑', price:260,   meta:'In-store + online',          dropsAt:t(20,15), armed:622, demand:8.6, sizes:['One size'] },
+  { id:'gshk', v:'watches',      brand:'G-Shock',         title:'MR-G × Frogman Titanium',            emoji:'⌚', price:3500,  meta:'700 units',                  dropsAt:t(50),    armed:31,  demand:6.4, sizes:['One size'] },
 
-  // Collectibles
-  { id:'pkmn', v:'collectibles', brand:'POKÉMON CENTER', title:'Scarlet & Violet 151 — ETB Restock',  img:'🃏', price:60,    meta:'1 per account',                    dropsAt:t(1,42),  hot:true,  armed:1204, demand:9.5, sizes:['ETB'] },
-  { id:'topp', v:'collectibles', brand:'TOPPS',          title:'Chrome Baseball Hobby Case',          img:'⚾', price:1899,  meta:'12 boxes · case',                  dropsAt:t(7,12),  armed:142, demand:8.0, sizes:['Case'] },
-  { id:'funk', v:'collectibles', brand:'FUNKO',          title:'Glow Goku Black SDCC Exclusive',      img:'🐉', price:35,    meta:'2,500 units',                      dropsAt:t(25),    armed:438, demand:7.8, sizes:['Standard'] },
-  { id:'lego', v:'collectibles', brand:'LEGO INSIDERS',  title:'UCS Millennium Falcon — Restock',     img:'🚀', price:849,   meta:'1 per household',                  dropsAt:t(45),    armed:201, demand:8.3, sizes:['UCS'] },
+  { id:'pkmn', v:'collectibles', brand:'Pokémon Center',  title:'Scarlet & Violet 151 — ETB Restock', emoji:'🃏', price:60,    meta:'1 per account',              dropsAt:t(1,42),  hot:true,  armed:1204,demand:9.5, sizes:['ETB'] },
+  { id:'topp', v:'collectibles', brand:'Topps',           title:'Chrome Baseball Hobby Case',         emoji:'⚾', price:1899,  meta:'12 boxes · case',            dropsAt:t(7,12),  armed:142, demand:8.0, sizes:['Case'] },
+  { id:'funk', v:'collectibles', brand:'Funko',           title:'Glow Goku Black SDCC Exclusive',     emoji:'🐉', price:35,    meta:'2,500 units',                dropsAt:t(25),    armed:438, demand:7.8, sizes:['Standard'] },
+  { id:'lego', v:'collectibles', brand:'LEGO Insiders',   title:'UCS Millennium Falcon — Restock',    emoji:'🚀', price:849,   meta:'1 per household',            dropsAt:t(45),    armed:201, demand:8.3, sizes:['UCS'] },
 
-  // Reservations
-  { id:'carb', v:'reservations', brand:'RESY · CARBONE', title:'Carbone NYC — Saturday 8:00pm',       img:'🍝', price:175,   meta:'$50 hold per seat',                dropsAt:t(0,38),  hot:true,  armed:142, demand:9.6, sizes:['2 ppl','4 ppl','6 ppl'] },
-  { id:'pb',   v:'reservations', brand:'RESY · POLO BAR',title:'The Polo Bar — Friday 7:30pm',        img:'🐴', price:175,   meta:'$50 hold per seat',                dropsAt:t(4,12),  armed:88,  demand:9.1, sizes:['2 ppl','4 ppl'] },
-  { id:'fl',   v:'reservations', brand:'TOCK · FRENCH LAUNDRY', title:'French Laundry — Sun Lunch',   img:'🥂', price:425,   meta:'Prepaid · non-refundable',        dropsAt:t(11),    armed:54,  demand:9.8, sizes:['2 ppl','4 ppl'] },
-  { id:'oma',  v:'reservations', brand:'TOCK · OMAKASE', title:'Sushi Noz — 6:00pm Counter',          img:'🍣', price:325,   meta:'Prepaid · counter only',          dropsAt:t(33),    armed:39,  demand:8.5, sizes:['1 seat','2 seats'] },
+  { id:'carb', v:'reservations', brand:'Resy · Carbone',  title:'Carbone NYC — Saturday 8:00pm',      emoji:'🍝', price:175,   meta:'$50 hold per seat',          dropsAt:t(0,38),  hot:true,  armed:142, demand:9.6, sizes:['2 ppl','4 ppl','6 ppl'] },
+  { id:'pb',   v:'reservations', brand:'Resy · Polo Bar', title:'The Polo Bar — Friday 7:30pm',       emoji:'🐴', price:175,   meta:'$50 hold per seat',          dropsAt:t(4,12),  armed:88,  demand:9.1, sizes:['2 ppl','4 ppl'] },
+  { id:'fl',   v:'reservations', brand:'Tock · French Laundry', title:'French Laundry — Sun Lunch',   emoji:'🥂', price:425,   meta:'Prepaid · non-refundable',   dropsAt:t(11),    armed:54,  demand:9.8, sizes:['2 ppl','4 ppl'] },
+  { id:'oma',  v:'reservations', brand:'Tock · Omakase',  title:'Sushi Noz — 6:00pm Counter',         emoji:'🍣', price:325,   meta:'Counter only',               dropsAt:t(33),    armed:39,  demand:8.5, sizes:['1 seat','2 seats'] },
 
-  // Auctions
-  { id:'sothx',v:'auctions',     brand:"SOTHEBY'S",      title:'Lot #A442 — Vintage Daytona 6263',    img:'⌚', price:48000, meta:'Ends in 18h · reserve met',        dropsAt:t(18,21), hot:true,  armed:24, demand:9.0, sizes:['Single lot'] },
-  { id:'ebay', v:'auctions',     brand:'EBAY',           title:'PSA 10 Charizard 1st Edition',        img:'🔥', price:12500, meta:'Auction ends in 6h',               dropsAt:t(6,4),   armed:312, demand:9.4, sizes:['Single lot'] },
-  { id:'herit',v:'auctions',     brand:'HERITAGE',       title:'1986 Fleer Jordan PSA 9',             img:'🏀', price:3800,  meta:'Ends in 26h',                      dropsAt:t(26),    armed:78,  demand:7.9, sizes:['Single lot'] },
+  { id:'sothx',v:'auctions',     brand:"Sotheby's",       title:'Lot #A442 — Vintage Daytona 6263',   emoji:'⌚', price:48000, meta:'Reserve met',                dropsAt:t(18,21), hot:true,  armed:24,  demand:9.0, sizes:['Single lot'] },
+  { id:'ebay', v:'auctions',     brand:'eBay',            title:'PSA 10 Charizard 1st Edition',       emoji:'🔥', price:12500, meta:'Auction',                    dropsAt:t(6,4),   armed:312, demand:9.4, sizes:['Single lot'] },
+  { id:'herit',v:'auctions',     brand:'Heritage',        title:'1986 Fleer Jordan PSA 9',            emoji:'🏀', price:3800,  meta:'Auction',                    dropsAt:t(26),    armed:78,  demand:7.9, sizes:['Single lot'] },
 
-  // Travel
-  { id:'mis1', v:'travel',       brand:'GOING (MISTAKE FARE)', title:'JFK → Tokyo Business — $812 RT', img:'✈️', price:812,  meta:'ANA · 6h window est.',             dropsAt:t(0,55),  hot:true, armed:188, demand:9.2, sizes:['1 pax','2 pax'] },
-  { id:'amx',  v:'travel',       brand:'AMEX FHR',       title:'Aman Tokyo — 4th night free',         img:'🏯', price:2400, meta:'Calendar opens midnight ET',       dropsAt:t(8,30),  armed:42, demand:7.4, sizes:['Std King','Premier'] },
-  { id:'flx',  v:'travel',       brand:'DELTA FLASH',    title:'LAX → Paris — 60k SkyMiles',          img:'🗼', price:380,  meta:'24h flash redemption',             dropsAt:t(15,10), armed:301, demand:8.1, sizes:['Main','Comfort+','Delta One'] },
+  { id:'mis1', v:'travel',       brand:'Going (Mistake Fare)', title:'JFK → Tokyo Business — $812 RT', emoji:'✈️', price:812, meta:'ANA · ~6h window',           dropsAt:t(0,55),  hot:true, armed:188,  demand:9.2, sizes:['1 pax','2 pax'] },
+  { id:'amx',  v:'travel',       brand:'Amex FHR',        title:'Aman Tokyo — 4th night free',        emoji:'🏯', price:2400,  meta:'Opens midnight ET',          dropsAt:t(8,30),  armed:42,  demand:7.4, sizes:['Std King','Premier'] },
+  { id:'flx',  v:'travel',       brand:'Delta Flash',     title:'LAX → Paris — 60k SkyMiles',         emoji:'🗼', price:380,   meta:'24h redemption',             dropsAt:t(15,10), armed:301, demand:8.1, sizes:['Main','Comfort+','Delta One'] },
 
-  // Mints
-  { id:'mint1',v:'mints',        brand:'BASE',           title:'Friend.tech v2 Genesis Pass',         img:'🎨', price:120,  meta:'Allowlist mint · 1 per wallet',    dropsAt:t(5,18),  hot:true, armed:892, demand:8.9, sizes:['1 pass'] },
-  { id:'mint2',v:'mints',        brand:'OPENSEA STUDIO', title:'Murakami × Pharrell — Genesis',       img:'🌸', price:222,  meta:'Public mint',                      dropsAt:t(13,40), armed:418, demand:8.4, sizes:['1 piece'] },
-  { id:'mint3',v:'mints',        brand:'ARBITRUM',       title:'$ARB Season 2 Airdrop Claim',         img:'💎', price:0,    meta:'Gas-only · claim window 1h',      dropsAt:t(40,12), armed:1842, demand:7.8, sizes:['Claim'] },
+  { id:'mint1',v:'mints',        brand:'Base',            title:'Friend.tech v2 Genesis Pass',        emoji:'🎨', price:120,   meta:'Allowlist · 1 per wallet',   dropsAt:t(5,18),  hot:true, armed:892, demand:8.9, sizes:['1 pass'] },
+  { id:'mint2',v:'mints',        brand:'OpenSea Studio',  title:'Murakami × Pharrell — Genesis',      emoji:'🌸', price:222,   meta:'Public mint',                dropsAt:t(13,40), armed:418, demand:8.4, sizes:['1 piece'] },
+  { id:'mint3',v:'mints',        brand:'Arbitrum',        title:'$ARB Season 2 Airdrop Claim',        emoji:'💎', price:0,     meta:'Gas-only · 1h window',       dropsAt:t(40,12), armed:1842,demand:7.8, sizes:['Claim'] },
 ];
 
 let AGENTS = [
-  { id:'a1', vertical:'sneakers',     title:'AJ1 "Lost & Found"',          img:'👟', size:'10.5',     limit:247.18, status:'armed',    dropsAt:t(1,22),  cardLast4:'4421' },
-  { id:'a2', vertical:'tickets',      title:'Travis Scott — LA N2',        img:'🎤', size:'Sec 102',  limit:485.00, status:'striking', dropsAt:t(0,0,8), cardLast4:'9087' },
-  { id:'a3', vertical:'reservations', title:'Carbone — Sat 8pm',           img:'🍝', size:'4 ppl',    limit:225.00, status:'armed',    dropsAt:t(0,38),  cardLast4:'3310' },
-  { id:'a4', vertical:'watches',      title:'Daytona AD waitlist',         img:'⌚', size:'White',    limit:15850.00, status:'idle',   dropsAt:t(3,8),   cardLast4:'7711' },
+  { id:'a1', vertical:'sneakers',     title:'AJ1 "Lost & Found"',  emoji:'👟', size:'10.5',    limit:247.18, status:'armed',    dropsAt:t(1,22),  cardLast4:'4421' },
+  { id:'a2', vertical:'tickets',      title:'Travis Scott — LA N2',emoji:'🎤', size:'Sec 102', limit:485.00, status:'striking', dropsAt:t(0,0,8), cardLast4:'9087' },
+  { id:'a3', vertical:'reservations', title:'Carbone — Sat 8pm',   emoji:'🍝', size:'4 ppl',   limit:225.00, status:'armed',    dropsAt:t(0,38),  cardLast4:'3310' },
 ];
 
 let currentVertical = 'all';
 let currentSort = 'time';
-let primeStep = 1;
-let primeDrop = null;
-let primeConfig = { size:null, max:null };
+let primeStep = 1, primeDrop = null, primeConfig = { size:null, max:null };
+
+/* =========================
+   HELPERS
+========================= */
+function fmtCountdown(target) {
+  const ms = Math.max(0, target.getTime() - Date.now());
+  const h = Math.floor(ms/3600000), m = Math.floor((ms%3600000)/60000), s = Math.floor((ms%60000)/1000);
+  if (h>0) return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+}
+function fmtFriendly(target) {
+  const ms = Math.max(0, target.getTime() - Date.now());
+  const h = Math.floor(ms/3600000), m = Math.floor((ms%3600000)/60000);
+  if (h >= 24) return `${Math.floor(h/24)}d ${h%24}h`;
+  if (h > 0) return `${h}h ${m}m`;
+  return `${m}m`;
+}
 
 /* =========================
    RENDER
@@ -490,166 +402,98 @@ let primeConfig = { size:null, max:null };
 function setVertical(v) {
   currentVertical = v;
   document.querySelectorAll('[data-nav]').forEach(b => b.classList.toggle('active', b.dataset.nav===v));
-  renderFeeds();
+  const t = v==='all' ? 'All drops' : VERTICALS[v].label;
+  document.getElementById('feedTitle').textContent = t;
+  renderGrid();
 }
-function setSort(s) {
-  currentSort = s;
-  ['time','demand','value'].forEach(k => {
-    const el = document.getElementById('sort-'+k);
-    el.classList.toggle('bg-ink-700', k===s);
-    el.classList.toggle('text-neutral-400', k!==s);
-  });
-  renderFeeds();
-}
-
-function fmtCountdown(target) {
-  const ms = Math.max(0, target.getTime() - Date.now());
-  const h = Math.floor(ms/3600000);
-  const m = Math.floor((ms%3600000)/60000);
-  const s = Math.floor((ms%60000)/1000);
-  if (h>0) return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-  return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
-}
+function setSort(s) { currentSort = s; renderGrid(); }
 
 function filtered() {
-  let list = currentVertical==='all' ? ALL_DROPS : ALL_DROPS.filter(d => d.v===currentVertical);
-  if (currentSort==='time')   list = [...list].sort((a,b)=> a.dropsAt - b.dropsAt);
-  if (currentSort==='demand') list = [...list].sort((a,b)=> b.armed - a.armed);
-  if (currentSort==='value')  list = [...list].sort((a,b)=> b.demand - a.demand);
+  let list = currentVertical==='all' ? [...ALL_DROPS] : ALL_DROPS.filter(d => d.v===currentVertical);
+  if (currentSort==='time')       list.sort((a,b) => a.dropsAt - b.dropsAt);
+  if (currentSort==='demand')     list.sort((a,b) => b.armed - a.armed);
+  if (currentSort==='value')      list.sort((a,b) => b.demand - a.demand);
+  if (currentSort==='price-low')  list.sort((a,b) => a.price - b.price);
+  if (currentSort==='price-high') list.sort((a,b) => b.price - a.price);
   return list;
 }
 
-function dropCard(d) {
-  const vc = VERTICALS[d.v];
+function productCard(d) {
+  const tile = VERTICALS[d.v].tile;
   return `
-    <button onclick="openPrime('${d.id}')" class="tap text-left card-grad border border-ink-800 hover:border-ink-700 rounded-2xl p-4 flex flex-col gap-3 group">
-      <div class="flex items-start gap-3">
-        <div class="w-14 h-14 rounded-xl bg-ink-800 border border-ink-700 grid place-items-center text-2xl flex-shrink-0">${d.img}</div>
-        <div class="flex-1 min-w-0">
-          <div class="flex items-center gap-1.5 flex-wrap">
-            <span class="text-[10px] uppercase tracking-wider font-bold px-1.5 py-0.5 rounded border ${vc.chip}">${vc.label}</span>
-            ${d.hot ? '<span class="text-[9px] uppercase font-bold bg-red-500/15 text-red-400 px-1.5 py-0.5 rounded">HOT</span>' : ''}
-          </div>
-          <div class="font-semibold text-[13px] mt-1.5 leading-snug line-clamp-2">${d.title}</div>
-          <div class="text-[11px] text-neutral-500 mt-0.5">${d.brand}</div>
+    <div class="product-card group">
+      <div class="relative">
+        <button onclick="openPrime('${d.id}')" class="block w-full aspect-square rounded-2xl overflow-hidden ${tile} relative">
+          <div class="product-img absolute inset-0 grid place-items-center text-[88px] select-none">${d.emoji}</div>
+          ${d.hot ? '<div class="absolute top-3 left-3 inline-flex items-center gap-1.5 bg-white/95 backdrop-blur px-2 py-1 rounded-full text-[10px] font-bold"><span class="w-1.5 h-1.5 rounded-full bg-red-500 pulse-dot"></span>HOT</div>' : ''}
+          <div class="absolute top-3 right-3 bg-white/95 backdrop-blur px-2 py-1 rounded-full text-[10px] font-bold mono" data-countdown="${d.dropsAt.getTime()}">${fmtFriendly(d.dropsAt)}</div>
+        </button>
+        <button onclick="openPrime('${d.id}')" class="quick-btn tap absolute bottom-3 left-3 right-3 bg-ink-950 text-white font-semibold py-2.5 rounded-full text-xs">Auto-buy →</button>
+      </div>
+      <div class="mt-3 px-1">
+        <div class="text-[11px] text-ink-500 font-medium">${d.brand}</div>
+        <div class="text-sm font-semibold mt-0.5 leading-snug line-clamp-2">${d.title}</div>
+        <div class="mt-1 flex items-center justify-between">
+          <div class="mono text-sm font-bold">${d.price>0 ? '$'+d.price.toLocaleString() : 'Free'}</div>
+          <div class="text-[11px] text-ink-500"><span class="mono">${d.armed.toLocaleString()}</span> watching</div>
         </div>
       </div>
-      <div class="mt-auto pt-2 border-t border-ink-800 flex items-end justify-between">
-        <div>
-          <div class="text-[10px] uppercase tracking-wider text-neutral-500">Drops in</div>
-          <div class="mono text-base font-bold mt-0.5" data-countdown="${d.dropsAt.getTime()}">${fmtCountdown(d.dropsAt)}</div>
-        </div>
-        <div class="text-right">
-          <div class="text-[10px] uppercase tracking-wider text-neutral-500">Armed</div>
-          <div class="mono text-base font-bold mt-0.5">${d.armed.toLocaleString()}</div>
-        </div>
-        <div class="text-right">
-          <div class="text-[10px] uppercase tracking-wider text-neutral-500">Demand</div>
-          <div class="mono text-base font-bold mt-0.5 ${vc.accent}">${d.demand}</div>
-        </div>
-      </div>
-    </button>
+    </div>
   `;
 }
 
-function weekRow(d) {
-  const vc = VERTICALS[d.v];
+function agentCard(a) {
+  const tile = VERTICALS[a.vertical].tile;
+  const statusColor = a.status==='armed' ? 'bg-emerald-500' : a.status==='striking' ? 'bg-amber-500' : 'bg-ink-400';
+  const statusLabel = a.status[0].toUpperCase()+a.status.slice(1);
   return `
-    <button onclick="openPrime('${d.id}')" class="tap text-left w-full grid grid-cols-[1fr_120px_120px_120px_120px_120px] gap-3 px-4 py-3 items-center border-b border-ink-800 last:border-b-0 hover:bg-ink-850/50">
-      <div class="flex items-center gap-3 min-w-0">
-        <div class="w-9 h-9 rounded-lg bg-ink-800 grid place-items-center text-lg flex-shrink-0">${d.img}</div>
-        <div class="min-w-0">
-          <div class="text-sm font-semibold truncate">${d.title}</div>
-          <div class="text-[11px] text-neutral-500 truncate">${d.brand}</div>
+    <div class="flex-shrink-0 w-[280px] bg-white border border-ink-200 rounded-2xl p-3 shadow-soft flex gap-3">
+      <div class="w-14 h-14 rounded-xl ${tile} grid place-items-center text-2xl flex-shrink-0">${a.emoji}</div>
+      <div class="flex-1 min-w-0">
+        <div class="flex items-center gap-1.5">
+          <span class="w-1.5 h-1.5 rounded-full ${statusColor} pulse-dot"></span>
+          <span class="text-[10px] uppercase font-bold tracking-wider text-ink-500">${statusLabel}</span>
+        </div>
+        <div class="text-sm font-semibold mt-0.5 truncate">${a.title}</div>
+        <div class="flex items-center justify-between mt-1">
+          <div class="text-[11px] text-ink-500">${a.size} · •••• ${a.cardLast4}</div>
+          <div class="mono text-xs font-bold" data-countdown="${a.dropsAt.getTime()}">${fmtCountdown(a.dropsAt)}</div>
         </div>
       </div>
-      <div><span class="text-[10px] uppercase tracking-wider font-bold px-1.5 py-0.5 rounded border ${vc.chip}">${vc.label}</span></div>
-      <div class="mono text-sm font-semibold" data-countdown="${d.dropsAt.getTime()}">${fmtCountdown(d.dropsAt)}</div>
-      <div class="mono text-sm">$${d.price.toLocaleString()}</div>
-      <div class="mono text-sm ${vc.accent}">${d.demand}</div>
-      <div class="text-right"><span class="text-[11px] text-neutral-400 group-hover:text-acid">Prime →</span></div>
-    </button>
+    </div>
   `;
 }
 
-function renderFeeds() {
+function renderGrid() {
   const list = filtered();
-  // Counts
-  ['all', ...Object.keys(VERTICALS)].forEach(v => {
-    const el = document.getElementById('cnt-'+v); if (!el) return;
-    el.textContent = v==='all' ? ALL_DROPS.length : ALL_DROPS.filter(d => d.v===v).length;
-  });
-  // Hero pinned to a featured one based on filter
-  const hero = list.find(d => d.hot) || list[0];
-  if (hero) {
-    primeDrop = primeDrop && document.getElementById('primeModal').classList.contains('hidden') ? null : primeDrop;
-    document.getElementById('heroBrand').textContent = hero.brand;
-    document.getElementById('heroTitle').textContent = hero.title;
-    document.getElementById('heroMeta').textContent = hero.meta;
-    document.getElementById('heroArmed').textContent = hero.armed.toLocaleString();
-    document.getElementById('heroCountdown').textContent = fmtCountdown(hero.dropsAt);
-    document.getElementById('hero').setAttribute('data-hero-id', hero.id);
-  }
-  const today = list.slice(0, 6);
-  const week  = list.slice(6, 14);
-  document.getElementById('todayGrid').innerHTML = today.map(dropCard).join('') || '<div class="col-span-full text-sm text-neutral-500 py-8 text-center">No drops match this filter.</div>';
-  document.getElementById('weekList').innerHTML  = week.map(weekRow).join('')  || '<div class="text-sm text-neutral-500 py-6 text-center">Nothing further out.</div>';
   document.getElementById('feedCount').textContent = list.length;
+  document.getElementById('grid').innerHTML = list.map(productCard).join('');
+  document.getElementById('empty').classList.toggle('hidden', list.length > 0);
 }
 
 function renderAgents() {
-  const html = AGENTS.map(a => {
-    const vc = VERTICALS[a.vertical];
-    const statusColor = a.status==='armed' ? 'bg-acid' : a.status==='striking' ? 'bg-yellow-400' : 'bg-neutral-500';
-    const statusLabel = a.status.toUpperCase();
-    const ring = a.status==='striking' ? 'ring-1 ring-yellow-400/50 shake' : '';
-    return `
-      <div class="${ring} glass border border-ink-700/60 rounded-2xl p-4">
-        <div class="flex items-start justify-between gap-2">
-          <div class="flex items-center gap-2.5 min-w-0">
-            <div class="w-9 h-9 rounded-lg bg-ink-800 grid place-items-center text-lg flex-shrink-0">${a.img}</div>
-            <div class="min-w-0">
-              <div class="text-[10px] uppercase tracking-wider font-bold px-1.5 py-0.5 rounded border ${vc.chip} inline-block">${vc.label}</div>
-              <div class="text-sm font-bold leading-tight mt-1 truncate">${a.title}</div>
-            </div>
-          </div>
-        </div>
-        <div class="mt-3 flex items-end justify-between">
-          <div>
-            <div class="flex items-center gap-1.5">
-              <span class="w-1.5 h-1.5 rounded-full ${statusColor} pulse-dot"></span>
-              <span class="text-[10px] font-bold tracking-wider text-neutral-300">${statusLabel}</span>
-            </div>
-            <div class="mono text-base font-bold mt-1" data-countdown="${a.dropsAt.getTime()}">${fmtCountdown(a.dropsAt)}</div>
-          </div>
-          <div class="text-right">
-            <div class="text-[10px] uppercase text-neutral-500 tracking-wider">Limit</div>
-            <div class="mono text-sm font-bold">$${a.limit.toFixed(2)}</div>
-            <div class="text-[10px] text-neutral-600 mt-0.5 mono">•••• ${a.cardLast4}</div>
-          </div>
-        </div>
-      </div>
-    `;
-  }).join('');
-  document.getElementById('agentsGrid').innerHTML = html;
-  document.getElementById('kpiArmed').textContent = AGENTS.filter(a => a.status!=='idle').length;
+  document.getElementById('agentsRow').innerHTML = AGENTS.map(agentCard).join('');
+  document.getElementById('agentCount').textContent = AGENTS.length;
+  document.getElementById('kpiArmed').textContent = AGENTS.filter(a=>a.status!=='idle').length;
+  document.getElementById('agentsBar').style.display = AGENTS.length ? '' : 'none';
 }
 
 function tick() {
-  // Hero
-  const heroId = document.getElementById('hero').getAttribute('data-hero-id');
-  const hero = ALL_DROPS.find(d => d.id===heroId);
-  if (hero) document.getElementById('heroCountdown').textContent = fmtCountdown(hero.dropsAt);
   document.querySelectorAll('[data-countdown]').forEach(el => {
-    el.textContent = fmtCountdown(new Date(parseInt(el.dataset.countdown)));
+    const target = new Date(parseInt(el.dataset.countdown));
+    // friendly format for grid (smaller), strict for agents (has colon)
+    el.textContent = (el.classList.contains('mono') && el.textContent.includes(':'))
+      ? fmtCountdown(target)
+      : fmtFriendly(target);
   });
+  const hero = ALL_DROPS.find(d => d.id==='aj4');
+  if (hero) document.getElementById('heroCountdown').textContent = fmtCountdown(hero.dropsAt);
 }
 
 /* =========================
-   PRIME AGENT FLOW
+   PRIME / AUTO-BUY FLOW
 ========================= */
 function openPrime(id) {
-  if (id==='featured') id = document.getElementById('hero').getAttribute('data-hero-id');
   primeDrop = ALL_DROPS.find(d => d.id===id);
   if (!primeDrop) return;
   primeStep = 1;
@@ -660,154 +504,144 @@ function openPrime(id) {
 function closePrime() { document.getElementById('primeModal').classList.add('hidden'); }
 
 function renderPrime() {
-  const labels = ['Configure','Fund','Arm'];
-  document.getElementById('stepLabel').textContent = `STEP ${primeStep} / 3 · ${labels[primeStep-1]}`;
+  const labels = ['Configure','Pay','Done'];
+  document.getElementById('stepLabel').textContent = `${primeStep} of 3 · ${labels[primeStep-1]}`;
   document.getElementById('primeSteps').innerHTML = [1,2,3].map(n =>
-    `<div class="w-7 h-1 rounded-full ${n<=primeStep ? 'bg-acid' : 'bg-ink-700'}"></div>`
+    `<div class="w-6 h-1 rounded-full ${n<=primeStep ? 'bg-ink-950' : 'bg-ink-200'}"></div>`
   ).join('');
 
   const body = document.getElementById('primeBody');
-  const vc = VERTICALS[primeDrop.v];
+  const tile = VERTICALS[primeDrop.v].tile;
 
   if (primeStep === 1) {
     const isReservation = primeDrop.v === 'reservations';
     const isAuction = primeDrop.v === 'auctions';
-    const sliderLabel = isAuction ? 'Max bid' : isReservation ? 'Hold amount per seat' : 'Max price';
+    const sliderLabel = isAuction ? 'Max bid' : isReservation ? 'Hold per seat' : 'Max price';
     const sizeLabel = isReservation ? 'Party size' : isAuction ? 'Lot' : primeDrop.v==='tickets' ? 'Section' : primeDrop.v==='watches' ? 'Variant' : 'Size';
     body.innerHTML = `
-      <div class="flex items-center gap-3">
-        <div class="w-14 h-14 rounded-xl bg-ink-800 border border-ink-700 grid place-items-center text-2xl">${primeDrop.img}</div>
+      <div class="flex items-center gap-4">
+        <div class="w-20 h-20 rounded-2xl ${tile} grid place-items-center text-4xl flex-shrink-0">${primeDrop.emoji}</div>
         <div class="min-w-0">
-          <div class="text-[10px] uppercase tracking-wider font-bold px-1.5 py-0.5 rounded border ${vc.chip} inline-block">${vc.label}</div>
-          <div class="font-bold leading-tight mt-1">${primeDrop.title}</div>
-          <div class="text-[11px] text-neutral-500 mt-0.5">${primeDrop.brand} · ${primeDrop.meta}</div>
+          <div class="text-xs text-ink-500">${primeDrop.brand}</div>
+          <div class="font-bold leading-tight mt-0.5">${primeDrop.title}</div>
+          <div class="text-xs text-ink-500 mt-1">${primeDrop.meta} · Drops in <span class="mono font-semibold text-ink-700" data-countdown="${primeDrop.dropsAt.getTime()}">${fmtCountdown(primeDrop.dropsAt)}</span></div>
         </div>
       </div>
 
       <div class="mt-6">
-        <div class="text-[11px] uppercase tracking-wider text-neutral-500 font-bold mb-2">${sizeLabel}</div>
+        <div class="text-xs font-semibold text-ink-700 mb-2">${sizeLabel}</div>
         <div class="grid grid-cols-4 gap-2" id="sizeGrid">
-          ${primeDrop.sizes.map(s => `<button onclick="pickSize('${s}')" data-size="${s}" class="tap py-3 rounded-xl border border-ink-700 bg-ink-850 text-sm font-semibold hover:border-neutral-400">${s}</button>`).join('')}
+          ${primeDrop.sizes.map(s => `<button onclick="pickSize('${s}')" data-size="${s}" class="tap py-3 rounded-xl border border-ink-300 bg-white text-sm font-semibold hover:border-ink-950">${s}</button>`).join('')}
         </div>
       </div>
 
       <div class="mt-6">
         <div class="flex items-center justify-between mb-2">
-          <span class="text-[11px] uppercase tracking-wider text-neutral-500 font-bold">${sliderLabel}</span>
+          <span class="text-xs font-semibold text-ink-700">${sliderLabel}</span>
           <span class="mono font-bold text-lg">$<span id="maxPrice">${primeConfig.max}</span></span>
         </div>
-        <input type="range" min="${Math.max(1, Math.floor(primeDrop.price*0.5))}" max="${Math.max(100, primeDrop.price*4)}" value="${primeConfig.max}" oninput="setMax(this.value)" class="acid w-full" />
-        <div class="flex items-center justify-between text-[11px] text-neutral-500 mt-1">
-          <span>Floor</span>
+        <input type="range" min="${Math.max(1, Math.floor(primeDrop.price*0.5))}" max="${Math.max(100, primeDrop.price*4)}" value="${primeConfig.max}" oninput="setMax(this.value)" class="dark w-full" />
+        <div class="flex items-center justify-between text-[11px] text-ink-500 mt-1">
+          <span>Retail</span>
           <span>${isAuction ? 'Bid cap' : isReservation ? 'Hold cap' : 'Resale cap'}</span>
         </div>
       </div>
 
-      <div class="mt-6 grid grid-cols-2 gap-2 text-xs">
-        <label class="flex items-center gap-2 p-3 rounded-lg bg-ink-850 border border-ink-800 cursor-pointer">
-          <input type="checkbox" checked class="accent-[#D4FF3F]"/> Auto-retry on cart fail
-        </label>
-        <label class="flex items-center gap-2 p-3 rounded-lg bg-ink-850 border border-ink-800 cursor-pointer">
-          <input type="checkbox" checked class="accent-[#D4FF3F]"/> Push + SMS on outcome
-        </label>
+      <div class="mt-5 p-3 rounded-xl bg-ink-50 border border-ink-200 text-xs text-ink-700 leading-relaxed">
+        <span class="font-semibold">~400ms checkout.</span> Median win rate this drop: <span class="font-bold">${Math.round(primeDrop.demand*7)}%</span>. We'll text you the moment it goes through.
       </div>
 
-      <div class="mt-5 p-3 rounded-xl bg-ink-850 border border-ink-800 flex items-start gap-2">
-        <svg viewBox="0 0 24 24" class="w-4 h-4 text-acid flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
-        <div class="text-xs text-neutral-300 leading-relaxed">Agent will queue, solve captcha, and check out in <span class="mono text-acid font-bold">~400ms</span>. Median win rate this drop: <span class="text-acid font-bold">${Math.round(primeDrop.demand*7)}%</span>.</div>
-      </div>
-
-      <button onclick="nextStep()" id="step1Next" disabled class="tap mt-6 w-full bg-ink-700 text-neutral-500 font-bold py-4 rounded-xl">Continue →</button>
+      <button onclick="nextStep()" id="step1Next" disabled class="tap mt-6 w-full bg-ink-200 text-ink-500 font-semibold py-3.5 rounded-full">Continue →</button>
     `;
   } else if (primeStep === 2) {
     const isReservation = primeDrop.v === 'reservations';
     const isAuction = primeDrop.v === 'auctions';
     const isMint = primeDrop.v === 'mints';
-    const isTravel = primeDrop.v === 'travel';
     const tax  = isReservation || isMint ? 0 : +(primeConfig.max * 0.0875).toFixed(2);
-    const ship = primeDrop.v==='sneakers' || primeDrop.v==='collectibles' ? 12 : isTravel ? 0 : 0;
+    const ship = primeDrop.v==='sneakers' || primeDrop.v==='collectibles' ? 12 : 0;
     const fees = primeDrop.v==='tickets' ? +(primeConfig.max*0.18).toFixed(2) : isAuction ? +(primeConfig.max*0.20).toFixed(2) : isMint ? 8 : 0;
     const slip = +(primeConfig.max * 0.03).toFixed(2);
     const total = +(primeConfig.max + tax + ship + fees + slip).toFixed(2);
     body.innerHTML = `
-      <div class="text-[11px] uppercase tracking-wider text-neutral-500 font-bold">Fund the strike</div>
-      <h3 class="font-bold text-2xl mt-1">Exact amount loaded.</h3>
-      <p class="text-sm text-neutral-400 mt-1">Card auto-dies after the drop. Unspent USDC returns to your wallet instantly.</p>
-
-      <div class="mt-5 bg-ink-850 border border-ink-800 rounded-2xl p-4 space-y-2.5">
-        <div class="flex justify-between text-sm"><span class="text-neutral-400">${isAuction ? 'Max bid' : 'Base price'}</span><span class="mono font-semibold">$${primeConfig.max.toFixed(2)}</span></div>
-        ${tax  ? `<div class="flex justify-between text-sm"><span class="text-neutral-400">Tax (est. 8.75%)</span><span class="mono font-semibold">$${tax.toFixed(2)}</span></div>` : ''}
-        ${ship ? `<div class="flex justify-between text-sm"><span class="text-neutral-400">Shipping</span><span class="mono font-semibold">$${ship.toFixed(2)}</span></div>` : ''}
-        ${fees ? `<div class="flex justify-between text-sm"><span class="text-neutral-400">${isAuction ? "Buyer's premium" : isMint ? 'Gas (est.)' : 'Service fees'}</span><span class="mono font-semibold">$${fees.toFixed(2)}</span></div>` : ''}
-        <div class="flex justify-between text-sm"><span class="text-neutral-400">Slippage buffer (3%)</span><span class="mono font-semibold">$${slip.toFixed(2)}</span></div>
-        <div class="border-t border-ink-700 pt-2.5 flex justify-between items-end">
-          <span class="text-sm font-semibold">Load amount</span>
-          <span class="mono font-bold text-2xl">$${total.toFixed(2)}</span>
+      <div class="text-xs font-semibold text-ink-500 uppercase tracking-wider">Order summary</div>
+      <div class="mt-2 flex items-center gap-3">
+        <div class="w-12 h-12 rounded-xl ${tile} grid place-items-center text-xl flex-shrink-0">${primeDrop.emoji}</div>
+        <div class="flex-1 min-w-0">
+          <div class="text-sm font-semibold truncate">${primeDrop.title}</div>
+          <div class="text-xs text-ink-500">${primeConfig.size || '—'}</div>
         </div>
       </div>
 
-      <div class="mt-5 text-[11px] uppercase tracking-wider text-neutral-500 font-bold mb-2">Pay with</div>
+      <div class="mt-5 bg-ink-50 border border-ink-200 rounded-2xl p-4 space-y-2.5 text-sm">
+        <div class="flex justify-between"><span class="text-ink-500">${isAuction ? 'Max bid' : 'Price'}</span><span class="mono font-semibold">$${primeConfig.max.toFixed(2)}</span></div>
+        ${tax  ? `<div class="flex justify-between"><span class="text-ink-500">Tax (est.)</span><span class="mono font-semibold">$${tax.toFixed(2)}</span></div>` : ''}
+        ${ship ? `<div class="flex justify-between"><span class="text-ink-500">Shipping</span><span class="mono font-semibold">$${ship.toFixed(2)}</span></div>` : ''}
+        ${fees ? `<div class="flex justify-between"><span class="text-ink-500">${isAuction ? "Buyer's premium" : isMint ? 'Gas (est.)' : 'Service fees'}</span><span class="mono font-semibold">$${fees.toFixed(2)}</span></div>` : ''}
+        <div class="flex justify-between"><span class="text-ink-500">Buffer (3%)</span><span class="mono font-semibold">$${slip.toFixed(2)}</span></div>
+        <div class="border-t border-ink-200 pt-2.5 flex justify-between items-end">
+          <span class="font-semibold">Total to load</span>
+          <span class="mono font-bold text-xl">$${total.toFixed(2)}</span>
+        </div>
+      </div>
+
+      <div class="mt-5 text-xs font-semibold text-ink-700 mb-2">Pay with</div>
       <div class="space-y-2">
-        <button onclick="selectPay(this)" data-pay="apple" class="paybtn tap w-full p-3.5 rounded-xl border-2 border-acid bg-acid/5 flex items-center justify-between">
+        <button onclick="selectPay(this)" data-pay="apple" class="paybtn tap w-full p-3.5 rounded-xl border-2 border-ink-950 bg-white flex items-center justify-between">
           <div class="flex items-center gap-3">
-            <div class="w-9 h-9 rounded-lg bg-white grid place-items-center">
-              <svg viewBox="0 0 24 24" class="w-5 h-5" fill="#000"><path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.08zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/></svg>
+            <div class="w-9 h-9 rounded-lg bg-ink-950 grid place-items-center">
+              <svg viewBox="0 0 24 24" class="w-5 h-5" fill="#FFF"><path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.08zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/></svg>
             </div>
-            <div><div class="font-semibold text-sm">Apple Pay</div><div class="text-[11px] text-neutral-500">Touch ID · instant</div></div>
+            <div class="text-left"><div class="font-semibold text-sm">Apple Pay</div><div class="text-[11px] text-ink-500">Touch ID · instant</div></div>
           </div>
-          <span class="text-acid font-bold text-xs">SELECTED</span>
+          <span class="text-ink-950 font-bold text-xs">SELECTED</span>
         </button>
-        <button onclick="selectPay(this)" data-pay="usdc" class="paybtn tap w-full p-3.5 rounded-xl border border-ink-700 bg-ink-850 flex items-center justify-between">
+        <button onclick="selectPay(this)" data-pay="usdc" class="paybtn tap w-full p-3.5 rounded-xl border border-ink-200 bg-white hover:border-ink-300 flex items-center justify-between">
           <div class="flex items-center gap-3">
             <div class="w-9 h-9 rounded-lg bg-blue-500 grid place-items-center text-white font-bold text-[10px]">USDC</div>
-            <div class="text-left"><div class="font-semibold text-sm">USDC balance</div><div class="text-[11px] text-neutral-500">$412.50 available</div></div>
+            <div class="text-left"><div class="font-semibold text-sm">USDC balance</div><div class="text-[11px] text-ink-500">$412.50 available</div></div>
           </div>
         </button>
-        <button onclick="selectPay(this)" data-pay="card" class="paybtn tap w-full p-3.5 rounded-xl border border-ink-700 bg-ink-850 flex items-center justify-between">
+        <button onclick="selectPay(this)" data-pay="card" class="paybtn tap w-full p-3.5 rounded-xl border border-ink-200 bg-white hover:border-ink-300 flex items-center justify-between">
           <div class="flex items-center gap-3">
-            <div class="w-9 h-9 rounded-lg bg-ink-700 grid place-items-center text-lg">💳</div>
-            <div class="text-left"><div class="font-semibold text-sm">Card •••• 8842</div><div class="text-[11px] text-neutral-500">Chase Sapphire</div></div>
+            <div class="w-9 h-9 rounded-lg bg-ink-100 grid place-items-center text-lg">💳</div>
+            <div class="text-left"><div class="font-semibold text-sm">Card •••• 8842</div><div class="text-[11px] text-ink-500">Chase Sapphire</div></div>
           </div>
         </button>
       </div>
 
-      <div class="mt-5 flex items-start gap-2 text-[11px] text-neutral-500 leading-relaxed">
-        <svg viewBox="0 0 24 24" class="w-3.5 h-3.5 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-        Funds held by Lithic. Hard-cap means the agent literally cannot overspend.
-      </div>
-
-      <button onclick="nextStep()" class="tap mt-6 w-full bg-acid text-ink-950 font-bold py-4 rounded-xl ring-acid">Load $${total.toFixed(2)} & arm agent →</button>
+      <button onclick="nextStep()" class="tap mt-6 w-full bg-ink-950 text-white font-semibold py-3.5 rounded-full">Load $${total.toFixed(2)} & arm agent →</button>
+      <div class="mt-3 text-center text-[11px] text-ink-500">Card is hard-capped — agent literally cannot overspend.</div>
     `;
   } else if (primeStep === 3) {
     body.innerHTML = `
       <div class="text-center py-2">
-        <div class="text-[11px] uppercase tracking-wider text-acid font-bold">Agent armed</div>
-        <h3 class="font-extrabold text-2xl mt-1">Card materialized.</h3>
-        <p class="text-sm text-neutral-400 mt-1">Sit back. We'll ping you when it strikes.</p>
+        <div class="text-xs uppercase tracking-wider font-bold text-emerald-600">Agent armed</div>
+        <h3 class="font-bold text-2xl tracking-tight mt-1">You're all set.</h3>
+        <p class="text-sm text-ink-500 mt-1">We'll text you the moment it drops.</p>
       </div>
 
       <div class="mt-6 mx-auto card-mat" style="perspective:1000px;">
-        <div class="relative rounded-2xl p-5 overflow-hidden" style="background: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%); border:1px solid rgba(212,255,63,0.3); box-shadow: 0 20px 40px -10px rgba(212,255,63,0.15);">
-          <div class="absolute -top-16 -right-16 w-48 h-48 rounded-full bg-acid/20 blur-3xl"></div>
+        <div class="relative rounded-2xl p-5 overflow-hidden bg-ink-950 text-white">
+          <div class="absolute -top-16 -right-16 w-48 h-48 rounded-full bg-white/5 blur-3xl"></div>
           <div class="flex items-start justify-between">
             <div>
-              <div class="text-[10px] uppercase tracking-[0.2em] text-neutral-500 font-bold">Strike card</div>
-              <div class="text-sm font-bold mt-0.5">${primeDrop.title.substring(0,30)}${primeDrop.title.length>30?'…':''}</div>
+              <div class="text-[10px] uppercase tracking-[0.2em] text-white/60 font-bold">Snag card</div>
+              <div class="text-sm font-bold mt-0.5">${primeDrop.title.substring(0,28)}${primeDrop.title.length>28?'…':''}</div>
             </div>
             <div class="w-10 h-7 rounded bg-gradient-to-br from-yellow-200 to-yellow-500 opacity-90"></div>
           </div>
           <div class="mt-6 mono text-lg font-bold tracking-widest">4242 •••• •••• 7193</div>
-          <div class="mt-4 flex items-end justify-between">
+          <div class="mt-4 flex items-end justify-between text-white">
             <div>
-              <div class="text-[9px] uppercase text-neutral-500 tracking-wider">Hard limit</div>
-              <div class="mono font-bold text-acid">$${(primeConfig.max * 1.18).toFixed(2)}</div>
+              <div class="text-[9px] uppercase text-white/60 tracking-wider">Hard limit</div>
+              <div class="mono font-bold">$${(primeConfig.max * 1.18).toFixed(2)}</div>
             </div>
             <div>
-              <div class="text-[9px] uppercase text-neutral-500 tracking-wider">Expires</div>
+              <div class="text-[9px] uppercase text-white/60 tracking-wider">Expires</div>
               <div class="mono font-bold">${fmtCountdown(primeDrop.dropsAt).split(':').slice(0,2).join(':')}</div>
             </div>
             <div>
-              <div class="text-[9px] uppercase text-neutral-500 tracking-wider">CVV</div>
+              <div class="text-[9px] uppercase text-white/60 tracking-wider">CVV</div>
               <div class="mono font-bold">•••</div>
             </div>
           </div>
@@ -815,23 +649,23 @@ function renderPrime() {
       </div>
 
       <div class="mt-5 space-y-2">
-        <div class="flex items-center gap-3 p-3 rounded-xl bg-ink-850 border border-ink-800">
-          <div class="w-6 h-6 rounded-full bg-acid grid place-items-center"><svg viewBox="0 0 24 24" class="w-3 h-3" fill="none" stroke="#0A0A0A" stroke-width="4"><path d="M5 13l4 4L19 7"/></svg></div>
-          <div class="text-sm flex-1">Card provisioned & loaded</div>
+        <div class="flex items-center gap-3 p-3 rounded-xl bg-ink-50 border border-ink-200">
+          <div class="w-5 h-5 rounded-full bg-emerald-500 grid place-items-center"><svg viewBox="0 0 24 24" class="w-3 h-3" fill="none" stroke="#FFF" stroke-width="4"><path d="M5 13l4 4L19 7"/></svg></div>
+          <div class="text-sm flex-1">Card loaded</div>
         </div>
-        <div class="flex items-center gap-3 p-3 rounded-xl bg-ink-850 border border-ink-800">
-          <div class="w-6 h-6 rounded-full bg-acid grid place-items-center"><svg viewBox="0 0 24 24" class="w-3 h-3" fill="none" stroke="#0A0A0A" stroke-width="4"><path d="M5 13l4 4L19 7"/></svg></div>
-          <div class="text-sm flex-1">Listening for ${primeDrop.brand} endpoint</div>
+        <div class="flex items-center gap-3 p-3 rounded-xl bg-ink-50 border border-ink-200">
+          <div class="w-5 h-5 rounded-full bg-emerald-500 grid place-items-center"><svg viewBox="0 0 24 24" class="w-3 h-3" fill="none" stroke="#FFF" stroke-width="4"><path d="M5 13l4 4L19 7"/></svg></div>
+          <div class="text-sm flex-1">Listening for ${primeDrop.brand}</div>
         </div>
-        <div class="flex items-center gap-3 p-3 rounded-xl bg-ink-850 border border-ink-800">
-          <div class="w-6 h-6 rounded-full bg-ink-700 grid place-items-center"><span class="w-2 h-2 bg-neutral-500 rounded-full pulse-dot"></span></div>
-          <div class="text-sm flex-1 text-neutral-400">Will strike in <span class="mono text-acid font-bold">${fmtCountdown(primeDrop.dropsAt)}</span></div>
+        <div class="flex items-center gap-3 p-3 rounded-xl bg-ink-50 border border-ink-200">
+          <div class="w-5 h-5 rounded-full bg-ink-200 grid place-items-center"><span class="w-1.5 h-1.5 bg-ink-500 rounded-full pulse-dot"></span></div>
+          <div class="text-sm flex-1 text-ink-500">Strikes in <span class="mono text-ink-950 font-bold">${fmtCountdown(primeDrop.dropsAt)}</span></div>
         </div>
       </div>
 
       <div class="grid grid-cols-2 gap-2 mt-6">
-        <button onclick="closePrime()" class="tap bg-ink-800 border border-ink-700 py-3.5 rounded-xl font-semibold text-sm">View agents</button>
-        <button onclick="simulateWin()" class="tap bg-acid text-ink-950 py-3.5 rounded-xl font-bold text-sm">Simulate strike</button>
+        <button onclick="closePrime()" class="tap bg-white border border-ink-300 py-3 rounded-full font-semibold text-sm">Done</button>
+        <button onclick="simulateWin()" class="tap bg-ink-950 text-white py-3 rounded-full font-semibold text-sm">Simulate buy</button>
       </div>
     `;
   }
@@ -841,33 +675,26 @@ function pickSize(s) {
   primeConfig.size = s;
   document.querySelectorAll('#sizeGrid [data-size]').forEach(b => {
     const sel = b.dataset.size === s;
-    b.classList.toggle('border-acid', sel);
-    b.classList.toggle('bg-acid/10', sel);
-    b.classList.toggle('text-acid', sel);
-    b.classList.toggle('border-ink-700', !sel);
-    b.classList.toggle('bg-ink-850', !sel);
+    b.classList.toggle('border-ink-950', sel);
+    b.classList.toggle('bg-ink-950', sel);
+    b.classList.toggle('text-white', sel);
+    b.classList.toggle('border-ink-300', !sel);
+    b.classList.toggle('bg-white', !sel);
   });
   const btn = document.getElementById('step1Next');
   btn.disabled = false;
-  btn.classList.remove('bg-ink-700','text-neutral-500');
-  btn.classList.add('bg-acid','text-ink-950','ring-acid');
+  btn.classList.remove('bg-ink-200','text-ink-500');
+  btn.classList.add('bg-ink-950','text-white');
 }
-function setMax(v) {
-  primeConfig.max = parseFloat(v);
-  document.getElementById('maxPrice').textContent = v;
-}
+function setMax(v) { primeConfig.max = parseFloat(v); document.getElementById('maxPrice').textContent = v; }
 function selectPay(btn) {
   document.querySelectorAll('.paybtn').forEach(b => {
-    b.classList.remove('border-acid','bg-acid/5','border-2');
-    b.classList.add('border','border-ink-700','bg-ink-850');
-    const tag = b.querySelector('.text-acid.font-bold.text-xs');
-    if (tag) tag.remove();
+    b.classList.remove('border-ink-950','border-2'); b.classList.add('border','border-ink-200');
+    const tag = b.querySelector('.text-ink-950.font-bold.text-xs'); if (tag) tag.remove();
   });
-  btn.classList.remove('border','border-ink-700','bg-ink-850');
-  btn.classList.add('border-2','border-acid','bg-acid/5');
+  btn.classList.remove('border','border-ink-200'); btn.classList.add('border-2','border-ink-950');
   const span = document.createElement('span');
-  span.className = 'text-acid font-bold text-xs';
-  span.textContent = 'SELECTED';
+  span.className = 'text-ink-950 font-bold text-xs'; span.textContent = 'SELECTED';
   btn.appendChild(span);
 }
 function nextStep() {
@@ -877,7 +704,7 @@ function nextStep() {
       id:'new'+Date.now(),
       vertical: primeDrop.v,
       title: primeDrop.title.split('—')[0].trim(),
-      img: primeDrop.img,
+      emoji: primeDrop.emoji,
       size: primeConfig.size,
       limit: +(primeConfig.max * 1.18).toFixed(2),
       status:'armed',
@@ -893,11 +720,11 @@ function simulateWin() {
   closePrime();
   const charged = (primeConfig.max + primeConfig.max*0.0875 + 12).toFixed(2);
   const refund = (primeConfig.max*0.03).toFixed(2);
-  document.getElementById('winTitle').textContent = "You got 'em.";
+  document.getElementById('winTitle').textContent = "It's yours.";
   document.getElementById('winSub').textContent = `${primeDrop.title} · confirmed in 0.4s`;
   document.getElementById('winCharged').textContent = `$${charged}`;
   document.getElementById('winRefund').textContent = `+$${refund}`;
-  document.getElementById('winTrack').textContent = primeDrop.v==='reservations' ? 'Resy #94821' : primeDrop.v==='auctions' ? 'Lot win #A442' : '1Z999AA10123';
+  document.getElementById('winTrack').textContent = primeDrop.v==='reservations' ? 'Resy #94821' : primeDrop.v==='auctions' ? 'Lot #A442' : '1Z999AA10123';
   document.getElementById('winOverlay').classList.remove('hidden');
 }
 function closeWin() { document.getElementById('winOverlay').classList.add('hidden'); }
@@ -907,7 +734,7 @@ function closeWallet() { document.getElementById('walletSheet').classList.add('h
 /* =========================
    BOOT
 ========================= */
-renderFeeds();
+renderGrid();
 renderAgents();
 tick();
 setInterval(tick, 1000);
